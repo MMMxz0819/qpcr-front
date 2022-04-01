@@ -19,6 +19,8 @@ import echarts from "echarts";
 
 import JsonExcel from "vue-json-excel";
 
+import moment from "moment";
+
 // 导入NProgress, 包对应的JS和CSS
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
@@ -49,6 +51,7 @@ axios.interceptors.response.use(config => {
 // 挂在到Vue实例，后面可通过this调用
 Vue.prototype.$http = axios;
 Vue.prototype.$echarts = echarts;
+Vue.prototype.$moment = moment;
 Vue.component("downloadExcel", JsonExcel);
 
 Vue.config.productionTip = false;
@@ -57,17 +60,7 @@ Vue.component("tree-table", TreeTable);
 // 全局注册富文本编辑器
 Vue.use(VueQuillEditor);
 Vue.filter("dataFormat", function(originVal) {
-  const dt = new Date(originVal);
-
-  const y = dt.getFullYear();
-  const m = (dt.getMonth() + 1 + "").padStart(2, "0");
-  const d = (dt.getDate() + "").padStart(2, "0");
-
-  const hh = (dt.getHours() + "").padStart(2, "0");
-  const mm = (dt.getMinutes() + "").padStart(2, "0");
-  const ss = (dt.getSeconds() + "").padStart(2, "0");
-  // yyyy-mm-dd hh:mm:ss
-  return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+  return moment.unix(originVal).format('YYYY-MM-DD hh:mm')
 });
 
 new Vue({

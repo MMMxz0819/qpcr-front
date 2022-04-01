@@ -1,99 +1,280 @@
 <template>
-  <div>
-    首页
-    <!-- 2.为Echarts准备一个Dom -->
-    <!-- <el-row>
-      <el-col :span="16">
-        <div id="main" style="width: 1000px;height:600px;"></div>
-      </el-col>
-      <el-col :span="6">
-        <p>欢迎一起学习讨论</p>
-        <p>QQ: 1191448939</p>
-      </el-col>
-    </el-row> -->
+  <div id="china_map_box">
+    <div id="china_map"></div>
+    <div id="china_static">
+      <el-card class="box-card" shadow="always">
+        <div class="item">
+          本土现有确诊：
+          <div style="color:#e61c1d;font-weight:800">
+            {{ this.total.localConfirm }}
+          </div>
+          <div
+            class="tip"
+            :style="{ color: this.add.confirm > 0 ? '#be2121' : '#67C23A' }"
+          >
+            <i
+              :class="[
+                this.add.localConfirm > 0
+                  ? 'el-icon-caret-top'
+                  : 'el-icon-caret-bottom'
+              ]"
+              style="marginLeft: 10px;"
+            ></i
+            >{{ this.add.localConfirm }}
+          </div>
+        </div>
+        <div class="item">
+          无症状感染者：
+          <div style="color:#ae3ac6;font-weight:800">
+            {{ this.total.noInfect }}
+          </div>
+          <div
+            class="tip"
+            :style="{ color: this.add.confirm > 0 ? '#be2121' : '#67C23A' }"
+          >
+            <i
+              :class="[
+                this.add.noInfect > 0
+                  ? 'el-icon-caret-top'
+                  : 'el-icon-caret-bottom'
+              ]"
+              style="marginLeft: 10px;"
+            ></i
+            >{{ this.add.noInfect }}
+          </div>
+        </div>
+        <div class="item">
+          累计确诊：
+          <div style="color:#4e8be6;font-weight:800">
+            {{ this.total.confirm }}
+          </div>
+          <div
+            class="tip"
+            :style="{ color: this.add.confirm > 0 ? '#be2121' : '#67C23A' }"
+          >
+            <i
+              :class="[
+                this.add.confirm > 0
+                  ? 'el-icon-caret-top'
+                  : 'el-icon-caret-bottom'
+              ]"
+              style="marginLeft:10px"
+            ></i>
+            {{ this.add.confirm }}
+          </div>
+        </div>
+      </el-card>
+    </div>
   </div>
 </template>
 
 <script>
-// 1.导入echarts
 import echarts from "echarts";
+import "echarts/map/js/china.js";
 
+import axios from "axios";
 export default {
-  // 此时,页面上的元素,已经被渲染完毕了
-  async mounted() {
-    // 3.基于准备好的dom，初始化echarts实例
-    var myChart = echarts.init(document.getElementById("main"));
-    // 4.准备数据项和配置项
-    // 指定图表的配置项和数据
-    var option = {
-      legend: {},
-      tooltip: {
-        trigger: "axis",
-        showContent: false
-      },
-      dataset: {
-        source: [
-          ["product", "2012", "2013", "2014", "2015", "2016", "2017"],
-          ["Matcha Latte", 41.1, 30.4, 65.1, 53.3, 83.8, 98.7],
-          ["Milk Tea", 86.5, 92.1, 85.7, 83.1, 73.4, 55.1],
-          ["Cheese Cocoa", 24.1, 67.2, 79.5, 86.4, 65.2, 82.5],
-          ["Walnut Brownie", 55.2, 67.1, 69.2, 72.4, 53.9, 39.1]
-        ]
-      },
-      xAxis: { type: "category" },
-      yAxis: { gridIndex: 0 },
-      grid: { top: "55%" },
-      series: [
-        { type: "line", smooth: true, seriesLayoutBy: "row" },
-        { type: "line", smooth: true, seriesLayoutBy: "row" },
-        { type: "line", smooth: true, seriesLayoutBy: "row" },
-        { type: "line", smooth: true, seriesLayoutBy: "row" },
-        {
-          type: "pie",
-          id: "pie",
-          radius: "30%",
-          center: ["50%", "25%"],
-          label: {
-            formatter: "{b}: {@2012} ({d}%)"
+  name: "Map",
+  data() {
+    return {
+      total: [],
+      add: [],
+      // echart 配制option
+      options: {
+        title: {
+          text: `新型冠状病毒肺炎疫情实时追踪（截止至${new Date().toLocaleString()}）`,
+          subtext:
+            "数据来源于国家卫健委、各省市区卫健委、各省市区政府以及港澳台官方渠道。"
+        },
+        tooltip: {
+          triggerOn: "mousemove", // mousemove、click
+          padding: 8,
+          borderWidth: 1,
+          borderColor: "#409eff",
+          backgroundColor: "rgba(255,255,255,0.7)",
+          textStyle: {
+            color: "#000000",
+            fontSize: 13
           },
-          encode: {
-            itemName: "product",
-            value: "2012",
-            tooltip: "2012"
-          }
-        }
-      ]
-    };
+          formatter: function(e, t, n) {
+            let data = e.data;
 
-    myChart.on("updateAxisPointer", function(event) {
-      var xAxisInfo = event.axesInfo[0];
-      if (xAxisInfo) {
-        var dimension = xAxisInfo.value + 1;
-        myChart.setOption({
-          series: {
-            id: "pie",
-            label: {
-              formatter: "{b}: {@[" + dimension + "]} ({d}%)"
+            let context = `
+               <div>
+                   <p><b style="font-size:15px;">${data.name}</b></p>
+                   <p class="tooltip_style"><span class="tooltip_left">现有确诊</span><span class="tooltip_right">${data.total.nowConfirm}</span></p>
+                    <p class="tooltip_style"><span class="tooltip_left">本土无症状</span><span class="tooltip_right">${data.total.wzz}</span></p>
+                    <p class="tooltip_style"><span class="tooltip_left">累计确诊</span><span class="tooltip_right">${data.total.confirm}</span></p>
+                    <p class="tooltip_style"><span class="tooltip_left">累计死亡</span><span class="tooltip_right">${data.total.dead}</span></p>
+               </div>
+            `;
+            return context;
+          }
+        },
+        visualMap: {
+          show: true,
+          left: 26,
+          bottom: 40,
+          showLabel: true,
+          pieces: [
+            {
+              gte: 1000,
+              label: ">= 1000",
+              color: "#1f307b"
             },
-            encode: {
-              value: dimension,
-              tooltip: dimension
+            {
+              gte: 500,
+              lt: 999,
+              label: "500 - 999",
+              color: "#3c57ce"
+            },
+            {
+              gte: 100,
+              lt: 499,
+              label: "100 - 499",
+              color: "#6f83db"
+            },
+            {
+              gte: 10,
+              lt: 99,
+              label: "10 - 99",
+              color: "#9face7"
+            },
+            {
+              lt: 10,
+              label: "<10",
+              color: "#bcc5ee"
+            }
+          ]
+        },
+        geo: {
+          map: "china",
+          scaleLimit: {
+            min: 1,
+            max: 2
+          },
+          zoom: 1,
+          top: 120,
+          label: {
+            normal: {
+              show: true,
+              fontSize: "14",
+              color: "rgba(0,0,0,0.7)"
+            }
+          },
+          itemStyle: {
+            normal: {
+              // shadowBlur: 50,
+              // shadowColor: 'rgba(0, 0, 0, 0.2)',
+              borderColor: "rgba(0, 0, 0, 0.2)"
+            },
+            emphasis: {
+              areaColor: "#f2d5ad",
+              shadowOffsetX: 0,
+              shadowOffsetY: 0,
+              borderWidth: 0
             }
           }
+        },
+        series: [
+          {
+            name: "突发事件",
+            type: "map",
+            geoIndex: 0,
+            data: []
+          }
+        ]
+      },
+      // echart data
+      dataList: []
+    };
+  },
+  methods: {
+    // 初始化中国地图
+    initEchartMap() {
+      let mapDiv = document.getElementById("china_map");
+      let myChart = echarts.init(mapDiv);
+      myChart.setOption(this.options);
+    },
+    // 修改echart配制
+    setEchartOption() {
+      console.log(this.dataList);
+      this.options.series[0]["data"] = this.dataList.map(v => {
+        return { ...v, value: v.total.nowConfirm };
+      });
+    },
+    async getStatic() {
+      await axios
+        .get(
+          "http://localhost:8081/api/query/inner/publish/modules/list?modules=statisGradeCityDetail,diseaseh5Shelf"
+        )
+        .then(res => {
+          console.log(res);
+          this.total = res.data.data.diseaseh5Shelf.chinaTotal;
+          this.add = res.data.data.diseaseh5Shelf.chinaAdd;
+          this.dataList = res.data.data.diseaseh5Shelf.areaTree[0].children;
         });
-      }
-    });
-    // 数据合并
-    //  const result = _.merge(res.data, this.options)
-    // 5.展示数据
-    myChart.setOption(option);
+      this.setEchartOption();
+      this.initEchartMap();
+    }
+  },
+  created() {
+    // this.setEchartOption();
+    this.getStatic();
   }
+  // mounted() {
+  //   this.$nextTick(() => {
+  //     this.initEchartMap();
+  //   });
+  // }
 };
 </script>
 
+<style scoped lang="less">
+#china_map_box {
+  background-color: #fff;
+  height: 100%;
+  position: relative;
+  display: flex;
+}
+#china_map_box #china_map {
+  height: 100%;
+  flex: 4;
+}
+#china_map_box #china_static {
+  flex: 2;
+  position: relative;
+  right: 50px;
+  margin-top: 20px;
+
+  .item {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 20px;
+    padding-bottom: 10px;
+
+    .tip {
+      font-size: 14px;
+    }
+  }
+}
+#china_map_box .china_map_logo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 45px;
+}
+</style>
 <style>
-div {
-  margin: 0;
-  padding: 0;
+#china_map .tooltip_style {
+  line-height: 1.7;
+  overflow: hidden;
+}
+#china_map .tooltip_left {
+  float: left;
+}
+#china_map .tooltip_right {
+  float: right;
 }
 </style>

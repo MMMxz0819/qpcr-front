@@ -65,6 +65,10 @@ const Report = () =>
   import(
     /* webpackChunkName: "Order_Report" */ "../components/report/Report.vue"
   );
+const ChipReport = () =>
+  import(
+    /* webpackChunkName: "Order_Report" */ "../components/report/Report2.vue"
+  );
 
 Vue.use(VueRouter);
 
@@ -85,7 +89,8 @@ const routes = [
       { path: "/statics", component: GoodsList },
       { path: "/statics/add", component: Add },
       { path: "/chip", component: Order },
-      { path: "/reports", component: Report }
+      { path: "/reports", component: Report },
+      { path: "/reports-chip", component: ChipReport }
     ]
   }
 ];

@@ -14,6 +14,7 @@
     "echarts": "^4.6.0",
     "element-ui": "^2.4.5",
     "lodash": "^4.17.15",
+    "moment": "^2.29.1",
     "nprogress": "^0.2.0",
     "vue": "^2.6.10",
     "vue-json-excel": "^0.3.0",

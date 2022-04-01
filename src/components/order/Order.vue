@@ -58,12 +58,12 @@
         >
         <el-table-column label="操作">
           <template slot slot-scope="scope">
-            <el-button
+            <!-- <el-button
               type="primary"
               size="mini"
               icon="el-icon-edit"
               @click="showEditDialog"
-            ></el-button>
+            ></el-button> -->
             <el-button
               type="success"
               size="mini"
@@ -136,10 +136,29 @@ export default {
     return {
       exportDataStandard: {
         设备号: "order_number",
-        样本信息: "order_price",
+        样本信息: {
+          field: "order_price",
+          callback: value => {
+            console.log(value);
+            if (!value.order_price) return "";
+            return value;
+          }
+        },
         检测人名: "order_fapiao_title",
-        芯片信息: "order_pay",
-        检测时间: "create_time",
+        芯片信息: {
+          field: "order_pay",
+          callback: value => {
+            return this.goodsList.filter(v => {
+              return v.goods_id === value;
+            })[0].goods_name;
+          }
+        },
+        检测时间: {
+          field: "create_time",
+          callback: value => {
+            return this.$moment(value).format("YYYY-MM-DD Hh:Mm:Ss");
+          }
+        },
         数据文件路径: "order_fapiao_company"
       },
       exportName: "导出数据",
@@ -227,6 +246,7 @@ export default {
         },
         xAxis: {
           type: "category",
+          boundaryGap: false,
           data: this.modalStatic.x
         },
         yAxis: {
@@ -236,7 +256,17 @@ export default {
           {
             data: this.modalStatic.y,
             type: "line",
-            smooth: "true"
+            smooth: "false",
+            symbol: "none",
+            itemStyle: {
+              normal: {
+                lineStyle: {
+                  width: 2,
+                  type: "dotted", // 'dotted'虚线 'solid'实线
+                  color: "#000"
+                }
+              }
+            }
           }
         ]
       };
@@ -248,7 +278,7 @@ export default {
         params: this.queryInfo
       });
       if (res.meta.status !== 200) {
-        return this.$message.error("获取商品列表失败！");
+        return this.$message.error("获取芯片列表失败！");
       }
       this.goodsList = res.data.goods;
       this.show = true;

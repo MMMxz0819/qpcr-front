@@ -36,15 +36,17 @@
         <el-table-column label="芯片曲线颜色">
           <template slot-scope="scope">
             <div>
-              {{
-                {
-                  1: "红",
-                  2: "绿",
-                  3: "黄",
-                  4: "橙",
-                  5: "蓝"
-                }[scope.row.hot_mumber]
-              }}
+              <span> {{
+                scope.row.hot_mumber.includes('1')?"红":''}}</span>
+                 <span> {{
+                scope.row.hot_mumber.includes('2')?"绿":''}}</span>
+                 <span> {{
+                scope.row.hot_mumber.includes('3')?"黄":''}}</span>
+                 <span> {{
+                scope.row.hot_mumber.includes('4')?"橙":''}}</span>
+                 <span> {{
+                scope.row.hot_mumber.includes('5')?"蓝":''}}</span>
+
             </div>
           </template>
         </el-table-column>
@@ -55,7 +57,7 @@
                 {
                   1: "虚",
                   2: "实"
-                }[scope.row.hot_mumber]
+                }[scope.row.goods_big_logo]
               }}
             </div>
           </template></el-table-column
@@ -97,6 +99,8 @@
 </template>
 
 <script>
+// import moment from 'moment'
+
 export default {
   data() {
     return {

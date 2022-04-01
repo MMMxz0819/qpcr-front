@@ -41,9 +41,13 @@ import {
   Timeline,
   TimelineItem,
   RadioGroup,
-  Radio
+  Radio,
+  RadioButton,
+  DatePicker
 } from "element-ui";
 
+Vue.use(DatePicker);
+Vue.use(RadioButton);
 Vue.use(RadioGroup);
 Vue.use(Radio);
 Vue.use(Button);

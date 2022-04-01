@@ -42,7 +42,6 @@
         <el-tabs
           v-model="activeIndex"
           :tab-position="'left'"
-          :before-leave="beforeTabLeave"
           @tab-click="tabClicked"
         >
           <el-tab-pane label="基本信息" name="0">
@@ -105,7 +104,15 @@
               <el-input v-model="addForm.goods_weight"></el-input>
             </el-form-item>
             <el-form-item label="芯片曲线颜色" prop="hot_mumber">
-              <el-select v-model="addForm.hot_mumber" placeholder="请选择">
+               <el-select v-model="addForm.hot_mumber" multiple  placeholder="请选择">
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+              <!-- <el-select v-model="addForm.hot_mumber" placeholder="请选择">
                 <el-option
                   v-for="item in options"
                   :key="item.value"
@@ -113,7 +120,7 @@
                   :value="item.value"
                 >
                 </el-option>
-              </el-select>
+              </el-select> -->
             </el-form-item>
             <el-form-item label="芯片曲线虚实" prop="goods_big_logo">
               <el-radio v-model="addForm.goods_big_logo" label="1">虚</el-radio>
@@ -185,9 +192,9 @@ export default {
         pics: [],
         // 芯片详情描述
         goods_introduce: "",
-        goods_big_logo: "real",
+        goods_big_logo: 1,
         goods_small_logo: "",
-        hot_mumber: 1,
+        hot_mumber: [],
         attrs: []
       },
       addFormRules: {
@@ -331,6 +338,7 @@ export default {
         form.goods_cat = [form.goods_cat, form.goods_cat, form.goods_cat].join(
           ","
         );
+        form.hot_mumber = form.hot_mumber.join(',')
 
         // 处理动态参数
         this.manyTableData.forEach(item => {
