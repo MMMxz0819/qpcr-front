@@ -22,7 +22,7 @@
       </el-date-picker>
       <div style="height:50px"></div>
       <!-- 2.为Echarts准备一个Dom -->
-      <div id="main" style="width: 750px;height:100%"></div>
+      <div id="main" style="width: 1550px;height:100%"></div>
     </el-card>
   </div>
 </template>
@@ -202,7 +202,6 @@ export default {
       let start = data.data.start.sort((a, b) => {
         return a.create_time - b.create_time;
       });
-      console.log(all, start);
       let source = []
       let statics = [];
       let xItem = ["date"];
@@ -212,7 +211,6 @@ export default {
         if (index === start.length - 1) {
           all.map(item => {
             if (v.create_time <= item.create_time) {
-              console.log('1');
               oneDay.push(item);
             }
           });
@@ -228,12 +226,10 @@ export default {
         }
         statics.push(oneDay);
       });
-      console.log(statics);
 
       source.push(xItem);
 
       this.chipList.map(j => {
-        console.log(j.goods_id);
         let eachChip = [j.goods_name];
         let times = statics.map(v => {
           return v.filter(item => item.order_pay === j.goods_id).length;

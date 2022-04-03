@@ -150,7 +150,7 @@ export default {
           callback: value => {
             return this.goodsList.filter(v => {
               return v.goods_id === value;
-            })[0].goods_name;
+            })[0].goods_name
           }
         },
         检测时间: {
@@ -198,7 +198,8 @@ export default {
       // 物流进度对话框
       progressDialogVisible: false,
       // 物流进度
-      progressInfo: []
+      progressInfo: [],
+      curChip: 1
     };
   },
   created() {
@@ -231,6 +232,8 @@ export default {
       this.$nextTick(this.echarts);
     },
     echarts() {
+      var chip = this.goodsList.find(v => v.goods_id === this.curChip);
+      console.log(chip);
       var chartDom = document.getElementById("echart1");
       var myChart = this.$echarts.init(chartDom);
       var option;
@@ -262,8 +265,19 @@ export default {
               normal: {
                 lineStyle: {
                   width: 2,
-                  type: "dotted", // 'dotted'虚线 'solid'实线
-                  color: "#000"
+                  type: chip.goods_big_logo === "1" ? "dotted" : "solid", // 'dotted'虚线 'solid'实线
+                  color:
+                    chip.hot_mumber === "1"
+                      ? "#FF0000"
+                      : chip.hot_mumber === "2"
+                        ? "#008000"
+                        : chip.hot_mumber === "3"
+                          ? " #FFFF00"
+                          : chip.hot_mumber === "4"
+                            ? "#F5DEB3"
+                            : chip.hot_mumber === "5"
+                              ? "#0000FF"
+                              : "#000"
                 }
               }
             }
@@ -317,6 +331,7 @@ export default {
       }
       this.modalStatic = res.data.ddate;
       this.progressDialogVisible = true;
+      this.curChip = res.data.order_pay;
       // console.log(val);
     }
   }

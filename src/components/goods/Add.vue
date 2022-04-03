@@ -26,8 +26,8 @@
         <el-step title="基本信息"></el-step>
         <!-- <el-step title="芯片参数"></el-step> -->
         <!-- <el-step title="芯片属性"></el-step> -->
-        <el-step title="芯片图片"></el-step>
-        <el-step title="芯片内容"></el-step>
+                <el-step title="芯片内容"></el-step>
+
         <el-step title="完成"></el-step>
       </el-steps>
 
@@ -51,55 +51,12 @@
             <el-form-item label="芯片价格" prop="goods_price">
               <el-input v-model="addForm.goods_price" type="number"></el-input>
             </el-form-item>
-            <!-- <el-form-item label="芯片重量" prop="goods_weight">
-              <el-input v-model="addForm.goods_weight" type="number"></el-input>
-            </el-form-item> -->
             <el-form-item label="芯片数量" prop="goods_number">
               <el-input v-model="addForm.goods_number" type="number"></el-input>
             </el-form-item>
-            <!-- <el-form-item label="芯片分类" prop="goods_cat">
-              <el-cascader
-                v-model="addForm.goods_cat"
-                :options="cateList"
-                :props="cascaderProps"
-                @change="handleChange"
-              ></el-cascader>
-            </el-form-item> -->
-          </el-tab-pane>
-          <!-- <el-tab-pane label="芯片参数" name="1"> -->
-          <!-- 渲染表单的Item项 -->
-          <!-- <el-form-item
-              v-for="item in manyTableData
 
-            "
-              :key="item.attr_id"
-              :label="item.attr_name"
-            > -->
-          <!-- 复选框组 -->
-          <!-- <el-checkbox-group v-model="item.attr_vals">
-                <el-checkbox :label="cb" v-for="(cb, i) in item.attr_vals" :key="i" border></el-checkbox>
-              </el-checkbox-group>
-            </el-form-item>
-          </el-tab-pane> -->
-          <!-- <el-tab-pane label="芯片属性" name="2">
-            <el-form-item :label="item.attr_name" v-for="item in onlyTableData" :key="item.attr_id">
-              <el-input v-model="item.attr_vals"></el-input>
-            </el-form-item>
-          </el-tab-pane> -->
-          <el-tab-pane label="芯片图片" name="3">
-            <!-- action: 图片上传的API接口地址 -->
-            <el-upload
-              :action="uploadURL"
-              :on-preview="handlePreview"
-              :on-remove="handleRemove"
-              :headers="headerObj"
-              list-type="picture"
-              :on-success="handleSuccess"
-            >
-              <el-button size="small" type="primary">点击上传</el-button>
-            </el-upload>
           </el-tab-pane>
-          <el-tab-pane label="芯片内容" name="4">
+          <el-tab-pane label="芯片内容" name="2">
             <el-form-item label="芯片参数" prop="goods_weight">
               <el-input v-model="addForm.goods_weight"></el-input>
             </el-form-item>
@@ -133,10 +90,28 @@
             <!-- 富文本编辑器 -->
             <!-- <quill-editor v-model="addForm.goods_introduce"></quill-editor> -->
             <!-- 添加芯片 -->
+
+          </el-tab-pane>
+
+          <el-tab-pane label="芯片图片" name="4">
+            <!-- action: 图片上传的API接口地址 -->
+            <el-upload
+              :action="uploadURL"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              :headers="headerObj"
+              list-type="picture"
+              :on-success="handleSuccess"
+            >
+              <el-button size="small" type="primary">点击上传</el-button>
+            </el-upload>
+            <div style='height:50px'></div>
+
             <el-button type="primary" class="btnAdd" @click="addGoods"
               >添加芯片</el-button
             >
           </el-tab-pane>
+
         </el-tabs>
       </el-form>
     </el-card>
@@ -290,18 +265,19 @@ export default {
             item.attr_vals.length === 0 ? [] : item.attr_vals.split(" ");
         });
         this.manyTableData = res.data;
-      } else if (this.activeIndex === "2") {
-        const { data: res } = await this.$http.get(
-          `categories/${this.getCateId}/attributes`,
-          {
-            params: { sel: "only" }
-          }
-        );
-        if (res.meta.status !== 200) {
-          return this.$message.error("获取动态参数列表失败！");
-        }
-        this.onlyTableData = res.data;
       }
+      // else if (this.activeIndex === "2") {
+      //   const { data: res } = await this.$http.get(
+      //     `categories/${this.getCateId}/attributes`,
+      //     {
+      //       params: { sel: "only" }
+      //     }
+      //   );
+      //   if (res.meta.status !== 200) {
+      //     return this.$message.error("获取动态参数列表失败！");
+      //   }
+      //   this.onlyTableData = res.data;
+      // }
     },
     // 处理图片预览
     handlePreview(file) {

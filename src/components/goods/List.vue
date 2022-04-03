@@ -36,17 +36,11 @@
         <el-table-column label="芯片曲线颜色">
           <template slot-scope="scope">
             <div>
-              <span> {{
-                scope.row.hot_mumber.includes('1')?"红":''}}</span>
-                 <span> {{
-                scope.row.hot_mumber.includes('2')?"绿":''}}</span>
-                 <span> {{
-                scope.row.hot_mumber.includes('3')?"黄":''}}</span>
-                 <span> {{
-                scope.row.hot_mumber.includes('4')?"橙":''}}</span>
-                 <span> {{
-                scope.row.hot_mumber.includes('5')?"蓝":''}}</span>
-
+              <span> {{ scope.row.hot_mumber.includes("1") ? "红" : "" }}</span>
+              <span> {{ scope.row.hot_mumber.includes("2") ? "绿" : "" }}</span>
+              <span> {{ scope.row.hot_mumber.includes("3") ? "黄" : "" }}</span>
+              <span> {{ scope.row.hot_mumber.includes("4") ? "橙" : "" }}</span>
+              <span> {{ scope.row.hot_mumber.includes("5") ? "蓝" : "" }}</span>
             </div>
           </template>
         </el-table-column>
@@ -56,7 +50,7 @@
               {{
                 {
                   1: "虚",
-                  2: "实"
+                  0: "实",
                 }[scope.row.goods_big_logo]
               }}
             </div>
@@ -73,6 +67,7 @@
               type="primary"
               icon="el-icon-edit"
               size="mini"
+              @click="showEditDialog(scope.row.goods_id)"
             ></el-button>
             <el-button
               type="danger"
@@ -95,6 +90,39 @@
         background
       ></el-pagination>
     </el-card>
+
+    <el-dialog
+      title="修改信息"
+      :visible.sync="addressDialogVisible"
+      width="50%"
+      @close="addressDialogClosed"
+    >
+      <el-form
+        :model="chipForm"
+        :rules="chipFormRules"
+        ref="chipFormRef"
+        label-width="100px"
+      >
+        <el-form-item label="芯片数量" prop="chipNum">
+          <el-input v-model="chipForm.chipNum"></el-input>
+        </el-form-item>
+        <el-form-item label="芯片颜色" prop="chipColor">
+          <el-select v-model="chipForm.chipColor" multiple placeholder="请选择">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option
+          ></el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addressDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -104,25 +132,61 @@
 export default {
   data() {
     return {
+      // 曲线颜色选择
+      options: [
+        {
+          value: 1,
+          label: "红",
+        },
+        {
+          value: 2,
+          label: "绿",
+        },
+        {
+          value: 3,
+          label: "黄",
+        },
+        {
+          value: 4,
+          label: "橙",
+        },
+        {
+          value: 5,
+          label: "蓝",
+        },
+      ],
       queryInfo: {
         query: "",
         pagenum: 1,
-        pagesize: 10
+        pagesize: 10,
       },
       // 商品列表
       goodsList: [],
       // 商品总数
-      total: 0
+      total: 0,
+      addressDialogVisible: false,
+      chipForm: {
+        chipNum: 0,
+        chipColor: "",
+      },
+      curId: "",
     };
   },
   created() {
     this.getGoodsList();
   },
   methods: {
+    submitForm(id) {
+      this.curId = id;
+      console.log(this.chipForm);
+    },
+    showEditDialog() {
+      this.addressDialogVisible = true;
+    },
     // 根据分页获取对应的商品列表
     async getGoodsList() {
       const { data: res } = await this.$http.get("goods", {
-        params: this.queryInfo
+        params: this.queryInfo,
       });
       if (res.meta.status !== 200) {
         return this.$message.error("获取商品列表失败！");
@@ -147,9 +211,9 @@ export default {
         {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
-          type: "warning"
+          type: "warning",
         }
-      ).catch(err => err);
+      ).catch((err) => err);
       if (confirmResult !== "confirm") {
         return this.$message.info("已取消删除！");
       }
@@ -162,8 +226,8 @@ export default {
     },
     goAddPage() {
       this.$router.push("/statics/add");
-    }
-  }
+    },
+  },
 };
 </script>
 
