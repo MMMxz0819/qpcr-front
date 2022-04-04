@@ -10,7 +10,7 @@
           </div>
           <div
             class="tip"
-            :style="{ color: this.add.confirm > 0 ? '#be2121' : '#67C23A' }"
+            :style="{ color: this.add.localConfirm > 0 ? '#be2121' : '#67C23A' }"
           >
             <i
               :class="[
@@ -30,7 +30,7 @@
           </div>
           <div
             class="tip"
-            :style="{ color: this.add.confirm > 0 ? '#be2121' : '#67C23A' }"
+            :style="{ color: this.add.noInfect > 0 ? '#be2121' : '#67C23A' }"
           >
             <i
               :class="[

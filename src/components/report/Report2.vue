@@ -81,7 +81,7 @@ export default {
       queryInfo: {
         query: "",
         pagenum: 1,
-        pagesize: 100,
+        pagesize: 10000,
         create_time: [
           moment()
             .subtract(6, "days")
@@ -90,7 +90,8 @@ export default {
           moment()
             .endOf("day")
             .unix()
-        ]
+        ],
+        chart: true
       },
       // 需要合并的数据
       option: {
@@ -141,7 +142,8 @@ export default {
         params: time
           ? {
             ...this.queryInfo,
-            create_time: [moment(time[0]).unix(), moment(time[1]).unix()]
+            create_time: [moment(time[0]).unix(), moment(time[1]).unix()],
+
           }
           : this.queryInfo
       });
@@ -230,9 +232,9 @@ export default {
       source.push(xItem);
 
       this.chipList.map(j => {
-        let eachChip = [j.goods_name];
+        let eachChip = [j.chip_name];
         let times = statics.map(v => {
-          return v.filter(item => item.order_pay === j.goods_id).length;
+          return v.filter(item => item.static_chip === j.chip_id).length;
         });
         let data = eachChip.concat(times);
         source.push(data);
@@ -240,7 +242,7 @@ export default {
       console.log(source);
       this.option.dataset.source = source
     },
-    async handlePick(time) {
+    handlePick(time) {
       this.showEchart(time);
     }
   }

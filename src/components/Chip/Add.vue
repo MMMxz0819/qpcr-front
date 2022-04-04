@@ -45,23 +45,23 @@
           @tab-click="tabClicked"
         >
           <el-tab-pane label="基本信息" name="0">
-            <el-form-item label="芯片名称" prop="goods_name">
-              <el-input v-model="addForm.goods_name"></el-input>
+            <el-form-item label="芯片名称" prop="chip_name">
+              <el-input v-model="addForm.chip_name"></el-input>
             </el-form-item>
-            <el-form-item label="芯片价格" prop="goods_price">
-              <el-input v-model="addForm.goods_price" type="number"></el-input>
+            <el-form-item label="芯片价格" prop="chip_price">
+              <el-input v-model="addForm.chip_price" type="number"></el-input>
             </el-form-item>
-            <el-form-item label="芯片数量" prop="goods_number">
-              <el-input v-model="addForm.goods_number" type="number"></el-input>
+            <el-form-item label="芯片数量" prop="chip_number">
+              <el-input v-model="addForm.chip_number" type="number"></el-input>
             </el-form-item>
 
           </el-tab-pane>
           <el-tab-pane label="芯片内容" name="2">
-            <el-form-item label="芯片参数" prop="goods_weight">
-              <el-input v-model="addForm.goods_weight"></el-input>
+            <el-form-item label="芯片参数" prop="chip_desc">
+              <el-input v-model="addForm.chip_desc"></el-input>
             </el-form-item>
-            <el-form-item label="芯片曲线颜色" prop="hot_mumber">
-               <el-select v-model="addForm.hot_mumber" multiple  placeholder="请选择">
+            <el-form-item label="芯片曲线颜色" prop="color_mumber">
+               <el-select v-model="addForm.color_mumber" multiple  placeholder="请选择">
                 <el-option
                   v-for="item in options"
                   :key="item.value"
@@ -69,7 +69,7 @@
                   :value="item.value">
                 </el-option>
               </el-select>
-              <!-- <el-select v-model="addForm.hot_mumber" placeholder="请选择">
+              <!-- <el-select v-model="addForm.color_mumber" placeholder="请选择">
                 <el-option
                   v-for="item in options"
                   :key="item.value"
@@ -79,10 +79,10 @@
                 </el-option>
               </el-select> -->
             </el-form-item>
-            <el-form-item label="芯片曲线虚实" prop="goods_big_logo">
-              <el-radio v-model="addForm.goods_big_logo" label="1">虚</el-radio>
-              <el-radio v-model="addForm.goods_big_logo" label="2">实</el-radio>
-              <!-- <el-radio-group v-model="addForm.goods_big_logo">
+            <el-form-item label="芯片曲线虚实" prop="line">
+              <el-radio v-model="addForm.line" label="1">虚</el-radio>
+              <el-radio v-model="addForm.line" label="0">实</el-radio>
+              <!-- <el-radio-group v-model="addForm.line">
                 <el-radio :label="real">实</el-radio>
                 <el-radio :label="virtual">虚</el-radio>
               </el-radio-group> -->
@@ -157,37 +157,38 @@ export default {
       activeIndex: "0",
       // 添加芯片的表单对象
       addForm: {
-        goods_name: "",
-        goods_price: 0,
-        goods_weight: "",
-        goods_number: 0,
+        chip_name: "",
+        chip_price: 0,
+        chip_desc: "",
+        chip_number: 0,
         // 芯片所属分类数组
         goods_cat: 1,
         // 图片的数组
         pics: [],
         // 芯片详情描述
         goods_introduce: "",
-        goods_big_logo: 1,
+        line: 1,
         goods_small_logo: "",
-        hot_mumber: [],
+        color_mumber: [],
         attrs: []
       },
       addFormRules: {
-        goods_name: [
+        chip_name: [
           { required: true, message: "请输入芯片名称", trigger: "blur" }
         ],
-        goods_price: [
+        chip_price: [
           { required: true, message: "请输入芯片价格", trigger: "blur" }
         ],
-        // goods_weight: [
-        //   { required: true, message: '请输入芯片重量', trigger: 'blur' }
-        // ],
-        goods_number: [
+        color_mumber: [
+          { required: true, message: '请选择曲线颜色', trigger: 'blur' }
+        ],
+        line: [
+          { required: true, message: '请选择曲线颜色', trigger: 'blur' }
+        ],
+        chip_number: [
           { required: true, message: "请输入芯片数量", trigger: "blur" }
         ],
-        goods_cat: [
-          { required: true, message: "请选择芯片分类", trigger: "blur" }
-        ]
+
       },
       // 芯片列表
       cateList: [],
@@ -214,7 +215,7 @@ export default {
     };
   },
   created() {
-    this.getCateList();
+    // this.getCateList();
   },
   computed: {
     getCateId() {
@@ -225,14 +226,14 @@ export default {
     }
   },
   methods: {
-    // 获取芯片分类数据列表
-    async getCateList() {
-      const { data: res } = await this.$http.get("categories");
-      if (res.meta.status !== 200) {
-        return this.$message.error("获取芯片列表失败！");
-      }
-      this.cateList = res.data;
-    },
+    // // 获取芯片分类数据列表
+    // async getCateList() {
+    //   const { data: res } = await this.$http.get("categories");
+    //   if (res.meta.status !== 200) {
+    //     return this.$message.error("获取芯片列表失败！");
+    //   }
+    //   this.cateList = res.data;
+    // },
     // 级联选择器选中项变化时出发
     handleChange() {
       console.log(this.addForm.goods_cat);
@@ -314,7 +315,7 @@ export default {
         form.goods_cat = [form.goods_cat, form.goods_cat, form.goods_cat].join(
           ","
         );
-        form.hot_mumber = form.hot_mumber.join(',')
+        form.color_mumber = form.color_mumber.join(',')
 
         // 处理动态参数
         this.manyTableData.forEach(item => {

@@ -30,17 +30,17 @@
       <!-- 表格数据 -->
       <el-table :data="goodsList" border stripe>
         <el-table-column type="index"></el-table-column>
-        <el-table-column label="芯片名称" prop="goods_name"></el-table-column>
-        <el-table-column label="芯片参数" prop="goods_weight"></el-table-column>
-        <el-table-column label="芯片数量" prop="goods_number"></el-table-column>
+        <el-table-column label="芯片名称" prop="chip_name"></el-table-column>
+        <el-table-column label="芯片参数" prop="chip_desc"></el-table-column>
+        <el-table-column label="芯片数量" prop="chip_number"></el-table-column>
         <el-table-column label="芯片曲线颜色">
           <template slot-scope="scope">
             <div>
-              <span> {{ scope.row.hot_mumber.includes("1") ? "红" : "" }}</span>
-              <span> {{ scope.row.hot_mumber.includes("2") ? "绿" : "" }}</span>
-              <span> {{ scope.row.hot_mumber.includes("3") ? "黄" : "" }}</span>
-              <span> {{ scope.row.hot_mumber.includes("4") ? "橙" : "" }}</span>
-              <span> {{ scope.row.hot_mumber.includes("5") ? "蓝" : "" }}</span>
+              <span> {{ scope.row.color_mumber.includes("1") ? "红" : "" }}</span>
+              <span> {{ scope.row.color_mumber.includes("2") ? "绿" : "" }}</span>
+              <span> {{ scope.row.color_mumber.includes("3") ? "黄" : "" }}</span>
+              <span> {{ scope.row.color_mumber.includes("4") ? "橙" : "" }}</span>
+              <span> {{ scope.row.color_mumber.includes("5") ? "蓝" : "" }}</span>
             </div>
           </template>
         </el-table-column>
@@ -50,8 +50,8 @@
               {{
                 {
                   1: "虚",
-                  0: "实",
-                }[scope.row.goods_big_logo]
+                  '0': "实",
+                }[scope.row.line]
               }}
             </div>
           </template></el-table-column
@@ -67,13 +67,13 @@
               type="primary"
               icon="el-icon-edit"
               size="mini"
-              @click="showEditDialog(scope.row.goods_id)"
+              @click="showEditDialog(scope.row)"
             ></el-button>
             <el-button
               type="danger"
               icon="el-icon-delete"
               size="mini"
-              @click="removeById(scope.row.goods_id)"
+              @click="removeById(scope.row.chip_id)"
             ></el-button>
           </template>
         </el-table-column>
@@ -95,7 +95,7 @@
       title="修改信息"
       :visible.sync="addressDialogVisible"
       width="50%"
-      @close="addressDialogClosed"
+      @close="handleClose"
     >
       <el-form
         :model="chipForm"
@@ -103,6 +103,12 @@
         ref="chipFormRef"
         label-width="100px"
       >
+      <el-form-item label="芯片名称" prop="chipName">
+          <el-input v-model="chipForm.chipName"></el-input>
+        </el-form-item>
+         <el-form-item label="芯片参数" prop="chipDesc">
+          <el-input v-model="chipForm.chipDesc"></el-input>
+        </el-form-item>
         <el-form-item label="芯片数量" prop="chipNum">
           <el-input v-model="chipForm.chipNum"></el-input>
         </el-form-item>
@@ -119,7 +125,7 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="addressDialogVisible = false">取 消</el-button>
+        <el-button @click="handleClose">取 消</el-button>
         <el-button type="primary" @click="submitForm">确 定</el-button>
       </span>
     </el-dialog>
@@ -160,36 +166,62 @@ export default {
         pagenum: 1,
         pagesize: 10,
       },
-      // 商品列表
+      // 芯片列表
       goodsList: [],
-      // 商品总数
+      // 芯片总数
       total: 0,
       addressDialogVisible: false,
       chipForm: {
+        chipDesc: '',
+        chipName: '',
         chipNum: 0,
-        chipColor: "",
+        chipColor: [],
       },
-      curId: "",
+      curItem: "",
     };
   },
   created() {
     this.getGoodsList();
   },
   methods: {
-    submitForm(id) {
-      this.curId = id;
-      console.log(this.chipForm);
+    handleClose() {
+      this.addressDialogVisible = false;
+      this.$refs['chipFormRef'].resetFields()
     },
-    showEditDialog() {
+    async submitForm() {
+      const { data: res } = await this.$http.put('goods/' + this.curItem.chip_id,
+        { ...this.curItem,
+          goods_cat: '1,1,1',
+          chip_desc: this.chipForm.chipDesc,
+          chip_number: this.chipForm.chipNum,
+          chip_name: this.chipForm.chipName,
+          color_mumber: this.chipForm.chipColor.join(','),
+        })
+
+      if (res.meta.status === 200) {
+        this.addressDialogVisible = false
+        this.getGoodsList()
+        this.$message.success('修改成功')
+      } else {
+        this.$message.error('修改失败')
+      }
+      this.$refs['chipFormRef'].resetFields()
+      console.log(res);
+    },
+    showEditDialog(item) {
       this.addressDialogVisible = true;
+      this.curItem = item
+      this.chipForm.chipName = item.chip_name
+      this.chipForm.chipDesc = item.chip_desc
+      this.chipForm.chipNum = item.chip_number
     },
-    // 根据分页获取对应的商品列表
+    // 根据分页获取对应的芯片列表
     async getGoodsList() {
       const { data: res } = await this.$http.get("goods", {
         params: this.queryInfo,
       });
       if (res.meta.status !== 200) {
-        return this.$message.error("获取商品列表失败！");
+        return this.$message.error("获取芯片列表失败！");
       }
       this.goodsList = res.data.goods;
       //   console.log(this.goodsList)
@@ -203,7 +235,7 @@ export default {
       this.queryInfo.pagenum = newSize;
       this.getGoodsList();
     },
-    // 通过Id删除商品
+    // 通过Id删除芯片
     async removeById(id) {
       const confirmResult = await this.$confirm(
         "此操作将永久删除该芯片, 是否继续?",
@@ -219,9 +251,9 @@ export default {
       }
       const { data: res } = await this.$http.delete("goods/" + id);
       if (res.meta.status !== 200) {
-        return this.$message.error("删除商品失败！");
+        return this.$message.error("删除芯片失败！");
       }
-      this.$message.success("删除商品成功！");
+      this.$message.success("删除芯片成功！");
       this.getGoodsList();
     },
     goAddPage() {

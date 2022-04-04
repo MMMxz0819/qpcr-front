@@ -9,11 +9,11 @@ import VueRouter from "vue-router";
 // import Rights from '../components/power/Rights.vue'
 // import Roles from '../components/power/Roles.vue'
 
-// import Cate from '../components/goods/Cate.vue'
-// import Params from '../components/goods/Params.vue'
+// import Cate from '../components/Chip/Cate.vue'
+// import Params from '../components/Chip/Params.vue'
 
-// import GoodsList from '../components/goods/List.vue'
-// import Add from '../components/goods/Add.vue'
+// import GoodsList from '../components/Chip/List.vue'
+// import Add from '../components/Chip/Add.vue'
 
 // import Order from '../components/order/Order.vue'
 // import Report from '../components/report/Report.vue'
@@ -44,22 +44,22 @@ const Roles = () =>
   );
 
 const Cate = () =>
-  import(/* webpackChunkName: "Cate_Params" */ "../components/goods/Cate.vue");
+  import(/* webpackChunkName: "Cate_Params" */ "../components/Chip/Cate.vue");
 const Params = () =>
   import(
-    /* webpackChunkName: "Cate_Params" */ "../components/goods/Params.vue"
+    /* webpackChunkName: "Cate_Params" */ "../components/Chip/Params.vue"
   );
 
 const GoodsList = () =>
   import(
-    /* webpackChunkName: "GoodsList_Add" */ "../components/goods/List.vue"
+    /* webpackChunkName: "GoodsList_Add" */ "../components/Chip/List.vue"
   );
 const Add = () =>
-  import(/* webpackChunkName: "GoodsList_Add" */ "../components/goods/Add.vue");
+  import(/* webpackChunkName: "GoodsList_Add" */ "../components/Chip/Add.vue");
 
 const Order = () =>
   import(
-    /* webpackChunkName: "Order_Report" */ "../components/order/Order.vue"
+    /* webpackChunkName: "Order_Report" */ "../components/Static/Order.vue"
   );
 const Report = () =>
   import(
@@ -86,9 +86,9 @@ const routes = [
       { path: "/roles", component: Roles },
       { path: "/categories", component: Cate },
       { path: "/params", component: Params },
-      { path: "/statics", component: GoodsList },
+      { path: "/statics", component: Order },
       { path: "/statics/add", component: Add },
-      { path: "/chip", component: Order },
+      { path: "/chip", component: GoodsList },
       { path: "/reports", component: Report },
       { path: "/reports-chip", component: ChipReport }
     ]

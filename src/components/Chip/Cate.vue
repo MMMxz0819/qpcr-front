@@ -3,8 +3,8 @@
     <!-- 面包屑导航区 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>商品管理</el-breadcrumb-item>
-      <el-breadcrumb-item>商品分类</el-breadcrumb-item>
+      <el-breadcrumb-item>芯片管理</el-breadcrumb-item>
+      <el-breadcrumb-item>芯片分类</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 卡片视图 -->
     <el-card>
@@ -110,7 +110,7 @@
 export default {
   data () {
     return {
-      // 商品分类数据
+      // 芯片分类数据
       cateList: [],
       // 查询条件
       queryInfo: {
@@ -189,13 +189,13 @@ export default {
     this.getCateList()
   },
   methods: {
-    // 获取商品分类
+    // 获取芯片分类
     async getCateList () {
       const { data: res } = await this.$http.get('categories', {
         params: this.queryInfo
       })
       if (res.meta.status !== 200) {
-        return this.$message.error('获取商品分类失败！')
+        return this.$message.error('获取芯片分类失败！')
       }
       // 给数据列表赋值
       this.cateList = res.data.result
@@ -275,8 +275,8 @@ export default {
       }).catch(err => err)
       if (confirmResult !== 'confirm') { return this.$message.info('已取消删除！') }
       const { data: res } = await this.$http.delete('categories/' + id)
-      if (res.meta.status !== 200) { return this.$message.error('删除商品分类失败！') }
-      this.$message.success('删除商品分类成功！')
+      if (res.meta.status !== 200) { return this.$message.error('删除芯片分类失败！') }
+      this.$message.success('删除芯片分类成功！')
       this.getCateList()
     },
     // 显示编辑对话框

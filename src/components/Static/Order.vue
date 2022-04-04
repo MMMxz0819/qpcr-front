@@ -10,9 +10,40 @@
     <el-card>
       <el-row :gutter="20">
         <el-col :span="6">
-          <el-input placeholder="请输入内容">
-            <el-button slot="append" icon="el-icon-search"></el-button>
+          <el-input
+          clearable="true"
+            placeholder="请输入检测人名"
+            v-model="queryInfo.test_name"
+          >
+            <el-button
+              slot="append"
+              icon="el-icon-search"
+              @click="getOrderList"
+            ></el-button>
           </el-input>
+        </el-col>
+        <el-col :span="6">
+          <el-input clearable="true" placeholder="请输入设备号" v-model="queryInfo.static_number">
+            <el-button
+              slot="append"
+              icon="el-icon-search"
+              @click="getOrderList"
+            ></el-button>
+          </el-input>
+        </el-col>
+        <el-col :span="6">
+          <el-date-picker
+            v-model="value2"
+            type="daterange"
+            align="right"
+            unlink-panels
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            :picker-options="pickerOptions"
+            @change="handlePick"
+          >
+          </el-date-picker>
         </el-col>
         <el-col :span="6">
           <download-excel
@@ -31,7 +62,7 @@
         </el-col>
       </el-row>
 
-      <!-- 订单列表 -->
+      <!-- 检测数据列表 -->
       <el-table
         :data="orderList"
         border
@@ -40,15 +71,15 @@
       >
         >
         <el-table-column type="selection" width="55"> </el-table-column>
-        <el-table-column label="设备号" prop="order_number"></el-table-column>
-        <el-table-column label="样本信息" prop="order_price"></el-table-column>
-        <el-table-column label="检测人名" prop="order_fapiao_title">
+        <el-table-column label="设备号" prop="static_number"></el-table-column>
+        <el-table-column label="样本信息" prop="static_price"></el-table-column>
+        <el-table-column label="检测人名" prop="test_name">
         </el-table-column>
-        <el-table-column label="芯片信息" prop="order_pay"
+        <el-table-column label="芯片信息" prop="static_chip"
           ><template slot-scope="scope">{{
             goodsList.filter(v => {
-              return v.goods_id === scope.row.order_pay;
-            })[0].goods_name
+              return v.chip_id === scope.row.static_chip;
+            })[0].chip_name
           }}</template></el-table-column
         >
         <el-table-column label="检测时间" prop="create_time"
@@ -58,23 +89,24 @@
         >
         <el-table-column label="操作">
           <template slot slot-scope="scope">
-            <!-- <el-button
-              type="primary"
-              size="mini"
-              icon="el-icon-edit"
-              @click="showEditDialog"
-            ></el-button> -->
             <el-button
               type="success"
               size="mini"
               icon="el-icon-location"
               @click="showProgressDialog(scope.row)"
             ></el-button>
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              size="mini"
+              @click="removeById(scope.row.static_id)"
+            ></el-button>
           </template>
         </el-table-column>
       </el-table>
       <!-- 分页区域 -->
-      <el-pagination
+      <div>
+         <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="queryInfo.pagenum"
@@ -83,40 +115,11 @@
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
       ></el-pagination>
+      </div>
+
     </el-card>
 
-    <!-- 编辑对话框 -->
-    <el-dialog
-      title="修改地址"
-      :visible.sync="addressDialogVisible"
-      width="50%"
-      @close="addressDialogClosed"
-    >
-      <el-form
-        :model="addressForm"
-        :rules="addressFormRules"
-        ref="addressFormRef"
-        label-width="100px"
-      >
-        <el-form-item label="省市区/县" prop="address1">
-          <el-cascader
-            v-model="addressForm.address1"
-            :options="cityData"
-            :props="{ expandTrigger: 'hover' }"
-          ></el-cascader>
-        </el-form-item>
-        <el-form-item label="详细地址" prop="address2">
-          <el-input v-model="addressForm.address2"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="addressDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false"
-          >确 定</el-button
-        >
-      </span>
-    </el-dialog>
-    <!-- 展示物流进度对话框 -->
+    <!-- 展示检测曲线对话框 -->
     <el-dialog
       title="核酸检测曲线"
       :visible.sync="progressDialogVisible"
@@ -129,28 +132,71 @@
 </template>
 
 <script>
-import cityData from "./citydata.js";
+import moment from "moment";
 
 export default {
   data() {
     return {
+      value2: [],
+      pickerOptions: {
+        shortcuts: [
+          {
+            text: "最近一周",
+            onClick(picker) {
+              const end = moment().endOf("day");
+              const start = moment()
+                .subtract(6, "days")
+                .startOf("day");
+
+              picker.$emit("pick", [start, end]);
+            }
+          },
+          {
+            text: "最近30天",
+            onClick(picker) {
+              const end = moment().endOf("day");
+              const start = moment()
+                .subtract(29, "days")
+                .startOf("day");
+              picker.$emit("pick", [start, end]);
+            }
+          },
+          {
+            text: "最近90天",
+            onClick(picker) {
+              const end = moment().endOf("day");
+              const start = moment()
+                .subtract(89, "days")
+                .startOf("day");
+              picker.$emit("pick", [start, end]);
+            }
+          }
+        ]
+      },
+      options: {
+        1: "#FF0000",
+        2: "#008000",
+        3: "#FFFF00",
+        4: "#F5DEB3",
+        5: "#0000FF"
+      },
       exportDataStandard: {
-        设备号: "order_number",
+        设备号: "static_number",
         样本信息: {
-          field: "order_price",
+          field: "static_price",
           callback: value => {
             console.log(value);
-            if (!value.order_price) return "";
+            if (!value.static_price) return "";
             return value;
           }
         },
-        检测人名: "order_fapiao_title",
+        检测人名: "test_name",
         芯片信息: {
-          field: "order_pay",
+          field: "static_chip",
           callback: value => {
             return this.goodsList.filter(v => {
-              return v.goods_id === value;
-            })[0].goods_name
+              return v.chip_id === value;
+            })[0].chip_name;
           }
         },
         检测时间: {
@@ -159,7 +205,7 @@ export default {
             return this.$moment(value).format("YYYY-MM-DD Hh:Mm:Ss");
           }
         },
-        数据文件路径: "order_fapiao_company"
+        数据文件路径: "static_path"
       },
       exportName: "导出数据",
       multipleSelection: [],
@@ -169,14 +215,19 @@ export default {
         y: [5, 5]
       },
       show: false,
-      // 订单列表查询参数
+      // 检测数据列表查询参数
       queryInfo: {
         query: "",
         pagenum: 1,
         pagesize: 10
       },
+      queryInfo2: {
+        query: "",
+        pagenum: 1,
+        pagesize: 10000
+      },
       total: 0,
-      // 订单列表
+      // 检测数据列表
       orderList: [],
       // 芯片列表
       goodsList: [],
@@ -186,25 +237,17 @@ export default {
         address1: [],
         address2: ""
       },
-      addressFormRules: {
-        address1: [
-          { required: true, message: "请选择省市区县", trigger: "blur" }
-        ],
-        address2: [
-          { required: true, message: "请输入详细地址", trigger: "blur" }
-        ]
-      },
-      cityData,
-      // 物流进度对话框
+
+      // 检测曲线对话框
       progressDialogVisible: false,
-      // 物流进度
+      // 检测曲线
       progressInfo: [],
       curChip: 1
     };
   },
   created() {
     this.getOrderList();
-    this.getGoodsList();
+    this.getChipsList();
   },
   mounted() {
     // this.$nextTick(this.echarts());
@@ -232,8 +275,7 @@ export default {
       this.$nextTick(this.echarts);
     },
     echarts() {
-      var chip = this.goodsList.find(v => v.goods_id === this.curChip);
-      console.log(chip);
+      var chip = this.goodsList.find(v => v.chip_id === this.curChip);
       var chartDom = document.getElementById("echart1");
       var myChart = this.$echarts.init(chartDom);
       var option;
@@ -255,41 +297,38 @@ export default {
         yAxis: {
           type: "value"
         },
-        series: [
-          {
-            data: this.modalStatic.y,
-            type: "line",
-            smooth: "false",
-            symbol: "none",
-            itemStyle: {
-              normal: {
-                lineStyle: {
-                  width: 2,
-                  type: chip.goods_big_logo === "1" ? "dotted" : "solid", // 'dotted'虚线 'solid'实线
-                  color:
-                    chip.hot_mumber === "1"
-                      ? "#FF0000"
-                      : chip.hot_mumber === "2"
-                        ? "#008000"
-                        : chip.hot_mumber === "3"
-                          ? " #FFFF00"
-                          : chip.hot_mumber === "4"
-                            ? "#F5DEB3"
-                            : chip.hot_mumber === "5"
-                              ? "#0000FF"
-                              : "#000"
-                }
+        series: []
+      };
+
+      this.modalStatic.y.map(v => {
+        let colorStaff = chip.color_mumber.split(",");
+        // eslint-disable-next-line standard/computed-property-even-spacing
+        let color = this.options[
+          colorStaff[Math.floor(Math.random() * colorStaff.length)]
+        ];
+        console.log(color);
+        option.series.push({
+          data: v,
+          type: "line",
+          smooth: "false",
+          symbol: "none",
+          itemStyle: {
+            normal: {
+              lineStyle: {
+                width: 2,
+                type: chip.line === "1" ? "dotted" : "solid", // 'dotted'虚线 'solid'实线
+                color: color
               }
             }
           }
-        ]
-      };
+        });
+      });
       myChart.setOption(option);
     },
 
-    async getGoodsList() {
+    async getChipsList() {
       const { data: res } = await this.$http.get("goods", {
-        params: this.queryInfo
+        params: this.queryInfo2
       });
       if (res.meta.status !== 200) {
         return this.$message.error("获取芯片列表失败！");
@@ -303,7 +342,7 @@ export default {
         params: this.queryInfo
       });
       if (res.meta.status !== 200) {
-        return this.$message.error("获取订单列表失败！");
+        return this.$message.error("获取检测数据列表失败！");
       }
       this.total = res.data.total;
       this.orderList = res.data.goods;
@@ -324,16 +363,49 @@ export default {
       this.$refs.addressFormRef.resetFields();
     },
     async showProgressDialog(val) {
-      // 供测试的物流单号：1106975712662
-      const { data: res } = await this.$http.get(`orders/${val.order_id}`);
+      const { data: res } = await this.$http.get(`orders/${val.static_id}`);
       if (res.meta.status !== 200) {
-        return this.$message.error("获取物流进度失败!");
+        return this.$message.error("获取检测曲线失败!");
       }
       this.modalStatic = res.data.ddate;
       this.progressDialogVisible = true;
-      this.curChip = res.data.order_pay;
+      this.curChip = res.data.static_chip;
       // console.log(val);
-    }
+    },
+    async handlePick(time) {
+      this.queryInfo.pagenum = 1
+      this.queryInfo.create_time = [moment(time[0]).unix(), moment(time[1]).unix()]
+      const { data: res } = await this.$http.get("orders", {
+        params: this.queryInfo
+      });
+      if (res.meta.status !== 200) {
+        return this.$message.error("获取检测数据列表失败！");
+      }
+      this.total = res.data.total;
+      this.orderList = res.data.goods;
+    },
+    // 删除检测数据
+    async removeById(id) {
+      const confirmResult = await this.$confirm(
+        "此操作将永久删除该检测数据, 是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      ).catch((err) => err);
+      if (confirmResult !== "confirm") {
+        return this.$message.info("已取消删除！");
+      }
+      console.log(id);
+      const { data: res } = await this.$http.delete("orders/" + id);
+      if (res.meta.status !== 200) {
+        return this.$message.error("删除检测数据失败！");
+      }
+      this.$message.success("删除检测数据成功！");
+      this.getOrderList();
+    },
   }
 };
 </script>
