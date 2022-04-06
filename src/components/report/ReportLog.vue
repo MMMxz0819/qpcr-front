@@ -3,8 +3,8 @@
     <!-- 面包屑导航区 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>芯片管理</el-breadcrumb-item>
-      <el-breadcrumb-item>芯片列表</el-breadcrumb-item>
+      <el-breadcrumb-item>数据统计</el-breadcrumb-item>
+      <el-breadcrumb-item>登录日志</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 卡片视图 -->
     <el-card>
@@ -33,8 +33,7 @@
         <el-table-column label="芯片名称" prop="chip_name"></el-table-column>
         <el-table-column label="芯片参数" prop="chip_desc"></el-table-column>
         <el-table-column label="芯片数量" prop="chip_number"></el-table-column>
-        <el-table-column label="CT值阈值" prop="color_mumber"></el-table-column>
-        <!-- <el-table-column label="芯片曲线颜色">
+        <el-table-column label="芯片曲线颜色">
           <template slot-scope="scope">
             <div>
               <span>
@@ -54,7 +53,7 @@
               >
             </div>
           </template>
-        </el-table-column> -->
+        </el-table-column>
         <el-table-column label="芯片曲线虚实">
           <template slot-scope="scope">
             <div>
@@ -108,7 +107,12 @@
       width="50%"
       @close="handleClose"
     >
-      <el-form :model="chipForm" ref="chipFormRef" label-width="100px">
+      <el-form
+        :model="chipForm"
+        :rules="chipFormRules"
+        ref="chipFormRef"
+        label-width="100px"
+      >
         <el-form-item label="芯片名称" prop="chipName">
           <el-input v-model="chipForm.chipName"></el-input>
         </el-form-item>
@@ -118,11 +122,16 @@
         <el-form-item label="芯片数量" prop="chipNum">
           <el-input v-model="chipForm.chipNum"></el-input>
         </el-form-item>
-        <el-form-item label="CT值阈值" prop="chipColor">
-          <el-input-number
-            v-model="chipForm.chipColor"
-            :min="1"
-          ></el-input-number>
+        <el-form-item label="芯片颜色" prop="chipColor">
+          <el-select v-model="chipForm.chipColor" multiple placeholder="请选择">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option
+          ></el-select>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -176,7 +185,7 @@ export default {
         chipDesc: "",
         chipName: "",
         chipNum: 0,
-        chipColor: ""
+        chipColor: []
       },
       curItem: ""
     };
@@ -198,7 +207,7 @@ export default {
           chip_desc: this.chipForm.chipDesc,
           chip_number: this.chipForm.chipNum,
           chip_name: this.chipForm.chipName,
-          color_mumber: this.chipForm.chipColor
+          color_mumber: this.chipForm.chipColor.join(",")
         }
       );
 
@@ -218,7 +227,6 @@ export default {
       this.chipForm.chipName = item.chip_name;
       this.chipForm.chipDesc = item.chip_desc;
       this.chipForm.chipNum = item.chip_number;
-      this.chipForm.chipColor = Number(item.color_mumber);
     },
     // 根据分页获取对应的芯片列表
     async getGoodsList() {

@@ -11,7 +11,7 @@
       <el-row :gutter="20">
         <el-col :span="6">
           <el-input
-          clearable="true"
+            clearable
             placeholder="请输入检测人名"
             v-model="queryInfo.test_name"
           >
@@ -23,7 +23,11 @@
           </el-input>
         </el-col>
         <el-col :span="6">
-          <el-input clearable="true" placeholder="请输入设备号" v-model="queryInfo.static_number">
+          <el-input
+            clearable
+            placeholder="请输入设备号"
+            v-model="queryInfo.static_number"
+          >
             <el-button
               slot="append"
               icon="el-icon-search"
@@ -32,18 +36,21 @@
           </el-input>
         </el-col>
         <el-col :span="6">
-          <el-date-picker
-            v-model="value2"
-            type="daterange"
-            align="right"
-            unlink-panels
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            :picker-options="pickerOptions"
-            @change="handlePick"
-          >
-          </el-date-picker>
+          <div style="width:100%">
+            <el-date-picker
+              style="width:100%"
+              v-model="value2"
+              type="daterange"
+              align="right"
+              unlink-panels
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              :picker-options="pickerOptions"
+              @change="handlePick"
+            >
+            </el-date-picker>
+          </div>
         </el-col>
         <el-col :span="6">
           <download-excel
@@ -73,8 +80,7 @@
         <el-table-column type="selection" width="55"> </el-table-column>
         <el-table-column label="设备号" prop="static_number"></el-table-column>
         <el-table-column label="样本信息" prop="static_price"></el-table-column>
-        <el-table-column label="检测人名" prop="test_name">
-        </el-table-column>
+        <el-table-column label="检测人名" prop="test_name"> </el-table-column>
         <el-table-column label="芯片信息" prop="static_chip"
           ><template slot-scope="scope">{{
             goodsList.filter(v => {
@@ -106,27 +112,48 @@
       </el-table>
       <!-- 分页区域 -->
       <div>
-         <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="queryInfo.pagenum"
-        :page-sizes="[5, 10, 15, 20]"
-        :page-size="queryInfo.pagesize"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-      ></el-pagination>
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="queryInfo.pagenum"
+          :page-sizes="[5, 10, 15, 20]"
+          :page-size="queryInfo.pagesize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
+        ></el-pagination>
       </div>
-
     </el-card>
 
     <!-- 展示检测曲线对话框 -->
     <el-dialog
       title="核酸检测曲线"
       :visible.sync="progressDialogVisible"
-      width="50%"
+      width="70%"
       @open="open()"
     >
       <div id="echart1" v-if="progressDialogVisible"></div>
+      <el-descriptions class="margin-top" title="预估数据" :column="2" border>
+        <el-descriptions-item>
+          <template slot="label">
+            阈值
+          </template>
+          {{ this.dty }}
+        </el-descriptions-item>
+
+        <el-descriptions-item>
+          <template slot="label">
+            预估阴阳性
+          </template>
+          {{ this.positive ? "阳" : "阴" }}
+        </el-descriptions-item>
+        <el-descriptions-item
+          :key="index"
+          v-for="(item, index) in this.ctValues"
+        >
+          <template slot="label"> 曲线{{ index + 1 }}-CT值 </template>
+          {{ item }}
+        </el-descriptions-item>
+      </el-descriptions>
     </el-dialog>
   </div>
 </template>
@@ -137,6 +164,7 @@ import moment from "moment";
 export default {
   data() {
     return {
+      ctValues: [],
       value2: [],
       pickerOptions: {
         shortcuts: [
@@ -208,7 +236,7 @@ export default {
         数据文件路径: "static_path"
       },
       exportName: "导出数据",
-      multipleSelection: [],
+      multipleSelection: "",
 
       modalStatic: {
         x: [1, 2],
@@ -242,7 +270,9 @@ export default {
       progressDialogVisible: false,
       // 检测曲线
       progressInfo: [],
-      curChip: 1
+      curChip: {},
+      dty: 0,
+      positive: false
     };
   },
   created() {
@@ -275,19 +305,23 @@ export default {
       this.$nextTick(this.echarts);
     },
     echarts() {
-      var chip = this.goodsList.find(v => v.chip_id === this.curChip);
-      var chartDom = document.getElementById("echart1");
-      var myChart = this.$echarts.init(chartDom);
-      var option;
+      console.log(this.dty);
+      let chip = this.curChip;
+      let chartDom = document.getElementById("echart1");
+      let myChart = this.$echarts.init(chartDom);
+      let option;
       option = {
         tooltip: {
           trigger: "axis",
-          axisPointer: {
-            type: "cross",
-            label: {
-              backgroundColor: "#6a7985"
-            }
+          legend: {
+            data: ["Email", "Union Ads", "Video Ads", "Direct", "Search Engine"]
           }
+          // axisPointer: {
+          //   type: "cross",
+          //   // label: {
+          //   //   backgroundColor: "#6a7985"
+          //   // }
+          // }
         },
         xAxis: {
           type: "category",
@@ -300,30 +334,64 @@ export default {
         series: []
       };
 
-      this.modalStatic.y.map(v => {
-        let colorStaff = chip.color_mumber.split(",");
+      this.modalStatic.y.map((v, index) => {
+        // let colorStaff = chip.color_mumber.split(",");
         // eslint-disable-next-line standard/computed-property-even-spacing
-        let color = this.options[
-          colorStaff[Math.floor(Math.random() * colorStaff.length)]
-        ];
-        console.log(color);
+        // let color = this.options[
+        //   colorStaff[Math.floor(Math.random() * colorStaff.length)]
+        // ];
         option.series.push({
+          name: `曲线${index + 1}`,
           data: v,
           type: "line",
           smooth: "false",
           symbol: "none",
+          markLine: {
+            silent: true,
+            lineStyle: {
+              color: "#333"
+            },
+            data: [
+              {
+                yAxis: this.dty
+              }
+            ]
+          },
           itemStyle: {
             normal: {
               lineStyle: {
                 width: 2,
-                type: chip.line === "1" ? "dotted" : "solid", // 'dotted'虚线 'solid'实线
-                color: color
+                type: chip.line === "1" ? "dotted" : "solid" // 'dotted'虚线 'solid'实线
+                // color: color
               }
             }
           }
         });
       });
       myChart.setOption(option);
+    },
+
+    calThreshold(array) {
+      let sum = function(x, y) {
+        return x + y;
+      }; // 求和函数
+      let square = function(x) {
+        return x * x;
+      }; // 数组中每个元素求它的平方
+      let data = array; //
+      let mean = data.reduce(sum) / data.length;
+      let deviations = data.map(function(x) {
+        return x - mean;
+      });
+      let stddev = Math.sqrt(
+        deviations.map(square).reduce(sum) / (data.length - 1)
+      );
+
+      let CTValue = mean + 10 * stddev;
+
+      this.dty = CTValue;
+
+      return CTValue;
     },
 
     async getChipsList() {
@@ -367,14 +435,52 @@ export default {
       if (res.meta.status !== 200) {
         return this.$message.error("获取检测曲线失败!");
       }
-      this.modalStatic = res.data.ddate;
+
+      let data = res.data.ddate;
+      this.modalStatic = data;
       this.progressDialogVisible = true;
       this.curChip = res.data.static_chip;
-      // console.log(val);
+
+      this.curChip = this.goodsList.find(
+        v => v.chip_id === res.data.static_chip
+      );
+
+      let ctValue = this.calThreshold(
+        // total
+        data.y[0].slice(2, 16).map(v => Number(v))
+      );
+
+      this.ctValues = data.y.map(v => {
+        let bigger = v.filter(k => k > ctValue);
+        console.log((v[v.length - 1] - v[0]) / data.x[-1] < 10.0);
+        if (!bigger.length) {
+          return "无CT值";
+        } else {
+          if ((v[v.length - 1] - v[0]) / data.x[data.x.length - 1] < 5.0) {
+            return "无CT值";
+          } else {
+            return Math.round(data.x[v.length - bigger.length]);
+          }
+        }
+      });
+
+      this.positive = this.ctValues
+        .map(v => {
+          if (v === "无CT值") {
+            return "阴";
+          } else if (v < this.curChip.color_mumber) {
+            return "阳";
+          }
+          return "阴";
+        })
+        .includes("阳");
     },
     async handlePick(time) {
-      this.queryInfo.pagenum = 1
-      this.queryInfo.create_time = [moment(time[0]).unix(), moment(time[1]).unix()]
+      this.queryInfo.pagenum = 1;
+      this.queryInfo.create_time = [
+        moment(time[0]).unix(),
+        moment(time[1]).unix()
+      ];
       const { data: res } = await this.$http.get("orders", {
         params: this.queryInfo
       });
@@ -392,9 +498,9 @@ export default {
         {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
-          type: "warning",
+          type: "warning"
         }
-      ).catch((err) => err);
+      ).catch(err => err);
       if (confirmResult !== "confirm") {
         return this.$message.info("已取消删除！");
       }
@@ -405,7 +511,7 @@ export default {
       }
       this.$message.success("删除检测数据成功！");
       this.getOrderList();
-    },
+    }
   }
 };
 </script>
@@ -416,8 +522,8 @@ export default {
 }
 
 #echart1 {
-  height: 350px;
-  width: 500px;
+  height: 400px;
+  width: 100%;
   margin: 0 auto;
 }
 </style>

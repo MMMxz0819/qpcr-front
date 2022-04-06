@@ -56,12 +56,12 @@ export default {
                    <p class="tooltip_style"><span class="tooltip_left">检测样本数</span><span class="tooltip_right">${
   data.total
 }</span></p>
-                    <p class="tooltip_style"><span class="tooltip_left">省内阳性率</span><span class="tooltip_right">${(
-    data.yang / data.total
-  ).toFixed(3) * 100}%</span></p>
-                    <p class="tooltip_style"><span class="tooltip_left">病例国内占比</span><span class="tooltip_right">${(
+                    <p class="tooltip_style"><span class="tooltip_left">省内阳性率 </span><span class="tooltip_right">${String(
+    (data.yang / data.total) * 100
+  ).slice(0, 5)}%</span></p>
+                    <p class="tooltip_style"><span class="tooltip_left">病例国内占比</span><span class="tooltip_right">${String((
     data.yang / 4087
-  ).toFixed(3) * 100}%</span></p>
+  ) * 100).slice(0, 5)}%</span></p>
 
                </div>
             `;

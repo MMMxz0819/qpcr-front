@@ -43,9 +43,15 @@ import {
   RadioGroup,
   Radio,
   RadioButton,
-  DatePicker
+  DatePicker,
+  Descriptions,
+  DescriptionsItem,
+  InputNumber
 } from "element-ui";
 
+Vue.use(InputNumber);
+Vue.use(Descriptions);
+Vue.use(DescriptionsItem);
 Vue.use(DatePicker);
 Vue.use(RadioButton);
 Vue.use(RadioGroup);

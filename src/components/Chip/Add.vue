@@ -26,7 +26,7 @@
         <el-step title="基本信息"></el-step>
         <!-- <el-step title="芯片参数"></el-step> -->
         <!-- <el-step title="芯片属性"></el-step> -->
-                <el-step title="芯片内容"></el-step>
+        <el-step title="芯片内容"></el-step>
 
         <el-step title="完成"></el-step>
       </el-steps>
@@ -54,30 +54,16 @@
             <el-form-item label="芯片数量" prop="chip_number">
               <el-input v-model="addForm.chip_number" type="number"></el-input>
             </el-form-item>
-
           </el-tab-pane>
           <el-tab-pane label="芯片内容" name="2">
             <el-form-item label="芯片参数" prop="chip_desc">
               <el-input v-model="addForm.chip_desc"></el-input>
             </el-form-item>
-            <el-form-item label="芯片曲线颜色" prop="color_mumber">
-               <el-select v-model="addForm.color_mumber" multiple  placeholder="请选择">
-                <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
-              <!-- <el-select v-model="addForm.color_mumber" placeholder="请选择">
-                <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                >
-                </el-option>
-              </el-select> -->
+            <el-form-item label="CT值阈值" prop="color_mumber">
+              <el-input-number
+                v-model="addForm.color_mumber"
+                :min="1"
+              ></el-input-number>
             </el-form-item>
             <el-form-item label="芯片曲线虚实" prop="line">
               <el-radio v-model="addForm.line" label="1">虚</el-radio>
@@ -90,7 +76,6 @@
             <!-- 富文本编辑器 -->
             <!-- <quill-editor v-model="addForm.goods_introduce"></quill-editor> -->
             <!-- 添加芯片 -->
-
           </el-tab-pane>
 
           <el-tab-pane label="芯片图片" name="4">
@@ -105,13 +90,12 @@
             >
               <el-button size="small" type="primary">点击上传</el-button>
             </el-upload>
-            <div style='height:50px'></div>
+            <div style="height:50px"></div>
 
             <el-button type="primary" class="btnAdd" @click="addGoods"
               >添加芯片</el-button
             >
           </el-tab-pane>
-
         </el-tabs>
       </el-form>
     </el-card>
@@ -131,28 +115,28 @@ export default {
   data() {
     return {
       // 曲线颜色选择
-      options: [
-        {
-          value: 1,
-          label: "红"
-        },
-        {
-          value: 2,
-          label: "绿"
-        },
-        {
-          value: 3,
-          label: "黄"
-        },
-        {
-          value: 4,
-          label: "橙"
-        },
-        {
-          value: 5,
-          label: "蓝"
-        }
-      ],
+      // options: [
+      //   {
+      //     value: 1,
+      //     label: "红"
+      //   },
+      //   {
+      //     value: 2,
+      //     label: "绿"
+      //   },
+      //   {
+      //     value: 3,
+      //     label: "黄"
+      //   },
+      //   {
+      //     value: 4,
+      //     label: "橙"
+      //   },
+      //   {
+      //     value: 5,
+      //     label: "蓝"
+      //   }
+      // ],
       // 步骤条默认激活 与左侧Tab联动
       activeIndex: "0",
       // 添加芯片的表单对象
@@ -169,7 +153,7 @@ export default {
         goods_introduce: "",
         line: 1,
         goods_small_logo: "",
-        color_mumber: [],
+        color_mumber: 1,
         attrs: []
       },
       addFormRules: {
@@ -180,15 +164,12 @@ export default {
           { required: true, message: "请输入芯片价格", trigger: "blur" }
         ],
         color_mumber: [
-          { required: true, message: '请选择曲线颜色', trigger: 'blur' }
+          { required: true, message: "请选择曲线颜色", trigger: "blur" }
         ],
-        line: [
-          { required: true, message: '请选择曲线颜色', trigger: 'blur' }
-        ],
+        line: [{ required: true, message: "请选择曲线颜色", trigger: "blur" }],
         chip_number: [
           { required: true, message: "请输入芯片数量", trigger: "blur" }
-        ],
-
+        ]
       },
       // 芯片列表
       cateList: [],
@@ -315,7 +296,6 @@ export default {
         form.goods_cat = [form.goods_cat, form.goods_cat, form.goods_cat].join(
           ","
         );
-        form.color_mumber = form.color_mumber.join(',')
 
         // 处理动态参数
         this.manyTableData.forEach(item => {
@@ -341,7 +321,7 @@ export default {
           return this.$message.error("添加芯片失败！");
         }
         this.$message.success("添加芯片成功!");
-        this.$router.push("/statics");
+        this.$router.push("/chip");
       });
     }
   }

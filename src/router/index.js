@@ -15,7 +15,7 @@ import VueRouter from "vue-router";
 // import GoodsList from '../components/Chip/List.vue'
 // import Add from '../components/Chip/Add.vue'
 
-// import Order from '../components/order/Order.vue'
+// import Order from '../components/order/Static.vue'
 // import Report from '../components/report/Report.vue'
 
 // 路由懒加载
@@ -46,20 +46,16 @@ const Roles = () =>
 const Cate = () =>
   import(/* webpackChunkName: "Cate_Params" */ "../components/Chip/Cate.vue");
 const Params = () =>
-  import(
-    /* webpackChunkName: "Cate_Params" */ "../components/Chip/Params.vue"
-  );
+  import(/* webpackChunkName: "Cate_Params" */ "../components/Chip/Params.vue");
 
 const GoodsList = () =>
-  import(
-    /* webpackChunkName: "GoodsList_Add" */ "../components/Chip/List.vue"
-  );
+  import(/* webpackChunkName: "GoodsList_Add" */ "../components/Chip/List.vue");
 const Add = () =>
   import(/* webpackChunkName: "GoodsList_Add" */ "../components/Chip/Add.vue");
 
 const Order = () =>
   import(
-    /* webpackChunkName: "Order_Report" */ "../components/Static/Order.vue"
+    /* webpackChunkName: "Order_Report" */ "../components/Static/Static.vue"
   );
 const Report = () =>
   import(
@@ -67,7 +63,11 @@ const Report = () =>
   );
 const ChipReport = () =>
   import(
-    /* webpackChunkName: "Order_Report" */ "../components/report/Report2.vue"
+    /* webpackChunkName: "ChipReport" */ "../components/report/Report2.vue"
+  );
+const LogReport = () =>
+  import(
+    /* webpackChunkName: "LogReport" */ "../components/report/ReportLog.vue"
   );
 
 Vue.use(VueRouter);
@@ -90,7 +90,8 @@ const routes = [
       { path: "/statics/add", component: Add },
       { path: "/chip", component: GoodsList },
       { path: "/reports", component: Report },
-      { path: "/reports-chip", component: ChipReport }
+      { path: "/reports-chip", component: ChipReport },
+      { path: "/reports-log", component: LogReport }
     ]
   }
 ];
