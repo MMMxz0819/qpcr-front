@@ -22,8 +22,7 @@
       </el-date-picker>
       <div style="height:50px"></div>
       <!-- 2.为Echarts准备一个Dom -->
-      <div id="main" style="width: 100%;height:400px"></div>
-      <div id="equit" style="width: 100%;height:400px"></div>
+      <div id="main" style="width: 1550px;height:100%"></div>
     </el-card>
   </div>
 </template>
@@ -37,6 +36,7 @@ export default {
   data() {
     return {
       chipStatic: [],
+      chipList: [],
       value2: [
         moment()
           .subtract(6, "days")
@@ -95,128 +95,118 @@ export default {
       },
       // 需要合并的数据
       option: {
-        title: {
-          left: "center",
-          text: "每日检测数据总数"
-        },
-        toolbox: {
-          feature: {
-            dataView: { show: true, readOnly: false },
-            magicType: { show: true, type: ["line", "bar"] },
-            restore: { show: true },
-            saveAsImage: { show: true }
-          }
-        },
+        legend: {},
         tooltip: {
-          trigger: "axis"
+          trigger: "axis",
+          showContent: false
         },
         dataset: {
           source: []
         },
-        xAxis: {
-          type: "category",
-          axisPointer: {
-            type: "shadow"
-          }
-        },
-        yAxis: [
+        xAxis: { type: "category" },
+        yAxis: { gridIndex: 0 },
+        grid: { top: "55%" },
+        series: [
           {
-            type: "value",
-            name: "检测总数",
-            min: 0,
-            axisLabel: {
-              formatter: "{value} 次"
-            }
-          },
-          {
-            type: "value",
-            name: "阴阳性数量",
-            min: 0,
-            axisLabel: {
-              formatter: "{value}次"
+            type: "pie",
+            id: "pie",
+            radius: "30%",
+            center: ["50%", "35%"],
+            emphasis: {
+              focus: "self"
+            },
+            label: {
+              formatter: "{b}: {@1} ({d}%)"
+            },
+            encode: {
+              itemName: "date",
+              value: 1,
+              tooltip: 1
             }
           }
-        ],
-
-        series: []
-      },
-      barOption: {
-        title: {
-          left: "center",
-          text: "每台设备使用情况"
-        },
-        tooltip: {
-          trigger: "axis"
-        },
-        xAxis: {
-          type: "category",
-          axisLabel: {
-            rotate: 45
-          }
-        },
-        yAxis: { type: "value" },
-
-        series: []
+        ]
       }
     };
   },
   created() {},
+  // 此时,页面上的元素,已经被渲染完毕了
   async mounted() {
+    this.getChipList();
+    // 3.基于准备好的dom，初始化echarts实例
     this.showEchart();
   },
   methods: {
     async showEchart(time) {
       var myChart = echarts.init(document.getElementById("main"));
-      var myChartEquit = echarts.init(document.getElementById("equit"));
       const { data: res } = await this.$http.get("statics", {
         params: time
           ? {
             ...this.queryInfo,
-            create_time: [moment(time[0]).unix(), moment(time[1]).unix()]
+            create_time: [moment(time[0]).unix(), moment(time[1]).unix()],
+
           }
           : this.queryInfo
       });
-
-      if (res.meta.status !== 200) return this.$message("获取折线图数据失败!");
       this.handleDay(res);
-      this.handleStatic(res);
-      myChart.setOption(this.option);
-      myChartEquit.setOption(this.barOption);
-    },
+      if (res.meta.status !== 200) return this.$message("获取折线图数据失败!");
+      // {
+      //   type: "line",
+      //   smooth: true,
+      //   seriesLayoutBy: "row",
+      //   emphasis: { focus: "series" }
+      // },
 
-    handleStatic(data) {
-      let all = data.data.all;
-      let equit = {};
-      all.map(v => {
-        if (!equit[v.static_number]) {
-          equit[v.static_number] = 1;
-          return;
+      myChart.on("updateAxisPointer", function(event) {
+        const xAxisInfo = event.axesInfo[0];
+
+        if (xAxisInfo) {
+          const dimension = xAxisInfo.value + 1;
+
+          myChart.setOption({
+            series: {
+              id: "pie",
+              label: {
+                formatter: "{b}: {@[" + dimension + "]} ({d}%)"
+              },
+              encode: {
+                value: dimension,
+                tooltip: dimension
+              }
+            }
+          });
         }
-
-        equit[v.static_number] = equit[v.static_number] + 1;
       });
 
-      const value = Object.values(equit);
-
-      this.barOption.xAxis.data = Object.keys(equit);
-      this.barOption.series = [
-        {
-          name: "使用次数",
-          data: value,
-          type: "bar"
-        }
-      ];
-
-      console.log();
+      // 5.展示数据
+      myChart.setOption(this.option);
+    },
+    async getChipList() {
+      const { data: res } = await this.$http.get("chips", {
+        params: this.queryInfo
+      });
+      if (res.meta.status !== 200) {
+        return this.$message.error("获取芯片列表失败！");
+      }
+      this.chipList = res.data.chips;
+      this.chipList.forEach(v => {
+        this.option.series.push(
+          {
+            type: "line",
+            smooth: true,
+            seriesLayoutBy: "row",
+            emphasis: { focus: "series" }
+          },
+        )
+      })
     },
     handleDay(data) {
       let all = data.data.all;
       let start = data.data.start.sort((a, b) => {
         return a.create_time - b.create_time;
       });
-      let source = [];
+      let source = []
       let statics = [];
-      let xItem = [];
+      let xItem = ["date"];
       start.map((v, index) => {
         xItem.push(moment.unix(v.create_time).format("YYYYMMDD"));
         let oneDay = [];
@@ -238,69 +228,18 @@ export default {
         }
         statics.push(oneDay);
       });
+
       source.push(xItem);
 
-      console.log(statics);
-
-      const positiveSta = statics.map(v => {
-        let unknow = v.filter(item => !item.positive).length;
-        let yang = v.filter(item => item.positive === "1").length;
-        let yin = v.filter(item => item.positive === "0").length;
-        return {
-          unknow,
-          yang,
-          yin
-        };
+      this.chipList.map(j => {
+        let eachChip = [j.chip_name];
+        let times = statics.map(v => {
+          return v.filter(item => item.static_chip === j.chip_id).length;
+        });
+        let data = eachChip.concat(times);
+        source.push(data);
       });
-
-      this.option.xAxis.data = source[0];
-
-      this.option.series = []
-      this.option.series.push({
-        name: "检测次数",
-        data: statics.map(v => v.length),
-        type: "line",
-        tooltip: {
-          valueFormatter: function(value) {
-            return value + " 次";
-          }
-        }
-      });
-
-      this.option.series.push({
-        name: "未确定阴阳性",
-        type: "bar",
-        tooltip: {
-          valueFormatter: function(value) {
-            return value + " 次";
-          }
-        },
-        data: positiveSta.map(v => v["unknow"])
-      });
-
-      this.option.series.push({
-        name: "阳性",
-        type: "bar",
-        tooltip: {
-          valueFormatter: function(value) {
-            return value + " 次";
-          }
-        },
-        data: positiveSta.map(v => v["yang"])
-      });
-
-      this.option.series.push({
-        name: "阴性",
-        type: "bar",
-        tooltip: {
-          valueFormatter: function(value) {
-            return value + " 次";
-          }
-        },
-        data: positiveSta.map(v => v["yin"])
-      });
-
-      // this.option.dataset.source = source;
+      this.option.dataset.source = source
     },
     handlePick(time) {
       this.showEchart(time);

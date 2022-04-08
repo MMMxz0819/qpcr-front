@@ -18,7 +18,7 @@
             <el-button
               slot="append"
               icon="el-icon-search"
-              @click="getOrderList"
+              @click="getStaticList"
             ></el-button>
           </el-input>
         </el-col>
@@ -31,9 +31,27 @@
             <el-button
               slot="append"
               icon="el-icon-search"
-              @click="getOrderList"
+              @click="getStaticList"
             ></el-button>
           </el-input>
+        </el-col>
+        <el-col :span="4">
+          <el-select
+            v-model="queryInfo.static_chip"
+            placeholder="请选择检测芯片"
+            @change="getStaticList"
+          >
+            <div style="width:100%">
+              <el-option
+                style="width:100%"
+                v-for="item in chipsList"
+                :key="item.chip_id"
+                :label="item.chip_name"
+                :value="item.chip_id"
+              >
+              </el-option>
+            </div>
+          </el-select>
         </el-col>
         <el-col :span="6">
           <div style="width:100%">
@@ -52,7 +70,7 @@
             </el-date-picker>
           </div>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="2">
           <download-excel
             :fields="exportDataStandard"
             :data="multipleSelection"
@@ -71,7 +89,7 @@
 
       <!-- 检测数据列表 -->
       <el-table
-        :data="orderList"
+        :data="staticList"
         border
         stripe
         @selection-change="handleSelectionChange"
@@ -83,7 +101,7 @@
         <el-table-column label="检测人名" prop="test_name"> </el-table-column>
         <el-table-column label="芯片信息" prop="static_chip"
           ><template slot-scope="scope">{{
-            goodsList.filter(v => {
+            chipsList.filter(v => {
               return v.chip_id === scope.row.static_chip;
             })[0].chip_name
           }}</template></el-table-column
@@ -93,8 +111,23 @@
             scope.row.create_time | dataFormat
           }}</template></el-table-column
         >
-        <el-table-column label="操作">
+        <el-table-column label="结果阴阳性" prop="positive"
+          ><template slot-scope="scope">{{
+            scope.row.positive
+              ? scope.row.positive === "0"
+                ? "阴"
+                : "阳"
+              : "未确认"
+          }}</template></el-table-column
+        >
+        <el-table-column label="操作" width="180px">
           <template slot slot-scope="scope">
+            <el-button
+              type="primary"
+              icon="el-icon-edit"
+              size="mini"
+              @click="showEditDialog(scope.row)"
+            ></el-button>
             <el-button
               type="success"
               size="mini"
@@ -155,6 +188,24 @@
         </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
+
+    <el-dialog
+      title="确定阴阳性"
+      :visible.sync="FormVisible"
+      width="50%"
+      @close="handleClose"
+    >
+      <el-form ref="FormRef" label-width="100px">
+        <el-form-item label="阴阳性">
+          <el-radio v-model="positiveReal" label="0">阴</el-radio>
+          <el-radio v-model="positiveReal" label="1">阳</el-radio>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="handleClose">取 消</el-button>
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -164,6 +215,7 @@ import moment from "moment";
 export default {
   data() {
     return {
+      positiveReal: null,
       ctValues: [],
       value2: [],
       pickerOptions: {
@@ -222,7 +274,7 @@ export default {
         芯片信息: {
           field: "static_chip",
           callback: value => {
-            return this.goodsList.filter(v => {
+            return this.chipsList.filter(v => {
               return v.chip_id === value;
             })[0].chip_name;
           }
@@ -256,15 +308,11 @@ export default {
       },
       total: 0,
       // 检测数据列表
-      orderList: [],
+      staticList: [],
       // 芯片列表
-      goodsList: [],
+      chipsList: [],
       // 修改地址对话框
-      addressDialogVisible: false,
-      addressForm: {
-        address1: [],
-        address2: ""
-      },
+      FormVisible: false,
 
       // 检测曲线对话框
       progressDialogVisible: false,
@@ -272,17 +320,22 @@ export default {
       progressInfo: [],
       curChip: {},
       dty: 0,
-      positive: false
+      positive: false,
+      curItem: {}
     };
   },
   created() {
-    this.getOrderList();
+    this.getStaticList();
     this.getChipsList();
   },
   mounted() {
     // this.$nextTick(this.echarts());
   },
   methods: {
+    handleClose() {
+      this.FormVisible = false;
+      this.$refs["FormRef"].resetFields();
+    },
     createExportData() {
       // 点击导出按钮之后,开始导出数据之前的执行函数,返回值为需要下载的数据
       // TODO:构造需要下载的数据返回
@@ -305,24 +358,11 @@ export default {
       this.$nextTick(this.echarts);
     },
     echarts() {
-      console.log(this.dty);
       let chip = this.curChip;
       let chartDom = document.getElementById("echart1");
       let myChart = this.$echarts.init(chartDom);
       let option;
       option = {
-        tooltip: {
-          trigger: "axis",
-          legend: {
-            data: ["Email", "Union Ads", "Video Ads", "Direct", "Search Engine"]
-          }
-          // axisPointer: {
-          //   type: "cross",
-          //   // label: {
-          //   //   backgroundColor: "#6a7985"
-          //   // }
-          // }
-        },
         xAxis: {
           type: "category",
           boundaryGap: false,
@@ -335,11 +375,6 @@ export default {
       };
 
       this.modalStatic.y.map((v, index) => {
-        // let colorStaff = chip.color_mumber.split(",");
-        // eslint-disable-next-line standard/computed-property-even-spacing
-        // let color = this.options[
-        //   colorStaff[Math.floor(Math.random() * colorStaff.length)]
-        // ];
         option.series.push({
           name: `曲线${index + 1}`,
           data: v,
@@ -395,43 +430,43 @@ export default {
     },
 
     async getChipsList() {
-      const { data: res } = await this.$http.get("goods", {
+      const { data: res } = await this.$http.get("chips", {
         params: this.queryInfo2
       });
       if (res.meta.status !== 200) {
         return this.$message.error("获取芯片列表失败！");
       }
-      this.goodsList = res.data.goods;
+      this.chipsList = res.data.chips;
       this.show = true;
-      // console.log(this.goodsList);
+      console.log(res.data);
     },
-    async getOrderList() {
-      const { data: res } = await this.$http.get("orders", {
+    async getStaticList() {
+      const { data: res } = await this.$http.get("statics", {
         params: this.queryInfo
       });
       if (res.meta.status !== 200) {
         return this.$message.error("获取检测数据列表失败！");
       }
       this.total = res.data.total;
-      this.orderList = res.data.goods;
+      this.staticList = res.data.statics;
     },
     // 分页
     handleSizeChange(newSize) {
       this.queryInfo.pagesize = newSize;
-      this.getOrderList();
+      this.getStaticList();
     },
     handleCurrentChange(newSize) {
       this.queryInfo.pagenum = newSize;
-      this.getOrderList();
+      this.getStaticList();
     },
-    showEditDialog() {
-      this.addressDialogVisible = true;
+    showEditDialog(val) {
+      this.FormVisible = true;
+      this.curItem = val;
+      this.positiveReal = this.curItem.positive
     },
-    addressDialogClosed() {
-      this.$refs.addressFormRef.resetFields();
-    },
+
     async showProgressDialog(val) {
-      const { data: res } = await this.$http.get(`orders/${val.static_id}`);
+      const { data: res } = await this.$http.get(`statics/${val.static_id}`);
       if (res.meta.status !== 200) {
         return this.$message.error("获取检测曲线失败!");
       }
@@ -441,7 +476,7 @@ export default {
       this.progressDialogVisible = true;
       this.curChip = res.data.static_chip;
 
-      this.curChip = this.goodsList.find(
+      this.curChip = this.chipsList.find(
         v => v.chip_id === res.data.static_chip
       );
 
@@ -481,14 +516,14 @@ export default {
         moment(time[0]).unix(),
         moment(time[1]).unix()
       ];
-      const { data: res } = await this.$http.get("orders", {
+      const { data: res } = await this.$http.get("statics", {
         params: this.queryInfo
       });
       if (res.meta.status !== 200) {
         return this.$message.error("获取检测数据列表失败！");
       }
       this.total = res.data.total;
-      this.orderList = res.data.goods;
+      this.staticList = res.data.statics;
     },
     // 删除检测数据
     async removeById(id) {
@@ -505,12 +540,32 @@ export default {
         return this.$message.info("已取消删除！");
       }
       console.log(id);
-      const { data: res } = await this.$http.delete("orders/" + id);
+      const { data: res } = await this.$http.delete("statics/" + id);
       if (res.meta.status !== 200) {
         return this.$message.error("删除检测数据失败！");
       }
       this.$message.success("删除检测数据成功！");
-      this.getOrderList();
+      this.getStaticList();
+    },
+    // 提交form
+    async submitForm() {
+      console.log(this.curItem);
+      const { data: res } = await this.$http.put(
+        "statics/" + this.curItem.static_id,
+        {
+          ...this.curItem,
+          positive: this.positiveReal
+        }
+      );
+
+      if (res.meta.status === 201) {
+        this.FormVisible = false;
+        this.getStaticList();
+        this.$message.success("修改成功");
+      } else {
+        this.$message.error("修改失败");
+      }
+      this.$refs["FormRef"].resetFields();
     }
   }
 };

@@ -70,7 +70,7 @@
 
 <script>
 import echarts from "echarts";
-import "echarts/map/js/china.js";
+import 'echarts/map/js/china.js';
 
 import axios from "axios";
 export default {
@@ -198,7 +198,6 @@ export default {
     },
     // 修改echart配制
     setEchartOption() {
-      console.log(this.dataList);
       this.options.series[0]["data"] = this.dataList.map(v => {
         return { ...v, value: v.total.nowConfirm };
       });
@@ -209,7 +208,6 @@ export default {
           "http://localhost:8081/api/query/inner/publish/modules/list?modules=statisGradeCityDetail,diseaseh5Shelf"
         )
         .then(res => {
-          console.log(res);
           this.total = res.data.data.diseaseh5Shelf.chinaTotal;
           this.add = res.data.data.diseaseh5Shelf.chinaAdd;
           this.dataList = res.data.data.diseaseh5Shelf.areaTree[0].children;

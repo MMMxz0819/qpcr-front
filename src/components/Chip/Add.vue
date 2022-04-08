@@ -39,11 +39,7 @@
         label-width="100px"
         label-position="top"
       >
-        <el-tabs
-          v-model="activeIndex"
-          :tab-position="'left'"
-          @tab-click="tabClicked"
-        >
+        <el-tabs v-model="activeIndex" :tab-position="'left'">
           <el-tab-pane label="基本信息" name="0">
             <el-form-item label="芯片名称" prop="chip_name">
               <el-input v-model="addForm.chip_name"></el-input>
@@ -73,9 +69,6 @@
                 <el-radio :label="virtual">虚</el-radio>
               </el-radio-group> -->
             </el-form-item>
-            <!-- 富文本编辑器 -->
-            <!-- <quill-editor v-model="addForm.goods_introduce"></quill-editor> -->
-            <!-- 添加芯片 -->
           </el-tab-pane>
 
           <el-tab-pane label="芯片图片" name="4">
@@ -92,7 +85,7 @@
             </el-upload>
             <div style="height:50px"></div>
 
-            <el-button type="primary" class="btnAdd" @click="addGoods"
+            <el-button type="primary" class="btnAdd" @click="addChip"
               >添加芯片</el-button
             >
           </el-tab-pane>
@@ -146,13 +139,11 @@ export default {
         chip_desc: "",
         chip_number: 0,
         // 芯片所属分类数组
-        goods_cat: 1,
+        total_cat: 1,
         // 图片的数组
         pics: [],
         // 芯片详情描述
-        goods_introduce: "",
         line: 1,
-        goods_small_logo: "",
         color_mumber: 1,
         attrs: []
       },
@@ -200,67 +191,28 @@ export default {
   },
   computed: {
     getCateId() {
-      if (this.addForm.goods_cat.length === 1) {
-        return this.addForm.goods_cat[0];
+      if (this.addForm.total_cat.length === 1) {
+        return this.addForm.total_cat[0];
       }
       return null;
     }
   },
   methods: {
-    // // 获取芯片分类数据列表
-    // async getCateList() {
-    //   const { data: res } = await this.$http.get("categories");
-    //   if (res.meta.status !== 200) {
-    //     return this.$message.error("获取芯片列表失败！");
-    //   }
-    //   this.cateList = res.data;
-    // },
-    // 级联选择器选中项变化时出发
     handleChange() {
-      console.log(this.addForm.goods_cat);
-      if (this.addForm.goods_cat.length !== 1) {
-        this.addForm.goods_cat = [];
+      console.log(this.addForm.total_cat);
+      if (this.addForm.total_cat.length !== 1) {
+        this.addForm.total_cat = [];
       }
     },
     // beforeTabLeave (activeName, odlActiveName) {
     //   // 未选中芯片分类阻止Tab标签跳转
-    //   if (odlActiveName === '0' && this.addForm.goods_cat.length !== 1) {
+    //   if (odlActiveName === '0' && this.addForm.total_cat.length !== 1) {
     //     this.$message.error('请先选择芯片分类')
     //     return false
     //   }
     // },
     // Tab标签被选中时触发
-    async tabClicked() {
-      // 访问动态参数面板
-      if (this.activeIndex === "1") {
-        const { data: res } = await this.$http.get(
-          `categories/${this.getCateId}/attributes`,
-          {
-            params: { sel: "many" }
-          }
-        );
-        if (res.meta.status !== 200) {
-          return this.$message.error("获取动态参数列表失败！");
-        }
-        res.data.forEach(item => {
-          item.attr_vals =
-            item.attr_vals.length === 0 ? [] : item.attr_vals.split(" ");
-        });
-        this.manyTableData = res.data;
-      }
-      // else if (this.activeIndex === "2") {
-      //   const { data: res } = await this.$http.get(
-      //     `categories/${this.getCateId}/attributes`,
-      //     {
-      //       params: { sel: "only" }
-      //     }
-      //   );
-      //   if (res.meta.status !== 200) {
-      //     return this.$message.error("获取动态参数列表失败！");
-      //   }
-      //   this.onlyTableData = res.data;
-      // }
-    },
+
     // 处理图片预览
     handlePreview(file) {
       this.picPreviewPath = file.response.data.url;
@@ -283,17 +235,17 @@ export default {
       this.addForm.pics.push(picInfo);
     },
     // 添加芯片
-    addGoods() {
+    addChip() {
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return this.$message.error("请填写必要的表单项！");
-        // 发送请求前：需对提交的表单进行处理goods_cat attrs
-        // this.addForm.goods_cat = this.addForm.goods_cat.join(',')
-        // 以上写法不对：级联选择器绑定的对象goods_cat要求是数组对象
+        // 发送请求前：需对提交的表单进行处理total_cat attrs
+        // this.addForm.total_cat = this.addForm.total_cat.join(',')
+        // 以上写法不对：级联选择器绑定的对象total_cat要求是数组对象
         // 解决办法: 包：lodash 方法（深拷贝）：cloneDeep(boj)
 
         // 将this.addForm进行深拷贝
         const form = _.cloneDeep(this.addForm);
-        form.goods_cat = [form.goods_cat, form.goods_cat, form.goods_cat].join(
+        form.total_cat = [form.total_cat, form.total_cat, form.total_cat].join(
           ","
         );
 
@@ -316,7 +268,7 @@ export default {
         form.attrs = this.addForm.attrs;
         // 发起请求添加芯片
         // 芯片名称必须是唯一的
-        const { data: res } = await this.$http.post("goods", form);
+        const { data: res } = await this.$http.post("chips", form);
         if (res.meta.status !== 201) {
           return this.$message.error("添加芯片失败！");
         }

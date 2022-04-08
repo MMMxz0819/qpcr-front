@@ -24,7 +24,7 @@
 
 <script>
 import echarts from "echarts";
-import "echarts/map/js/china.js";
+import 'echarts/map/js/china.js';
 import { provice } from "./service";
 
 export default {
@@ -52,16 +52,16 @@ export default {
 
             let context = `
                <div>
-                   <p><b style="font-size:15px;">${data.name}</b></p>
-                   <p class="tooltip_style"><span class="tooltip_left">检测样本数</span><span class="tooltip_right">${
-  data.total
+                   <p><b style="font-size:15px;">${data ? data.name : ''}</b></p>
+                   <p class="tooltip_style"><span class="tooltip_left">检测样本数</span><span class="tooltip_right">${data
+    ? data.total : 0
 }</span></p>
-                    <p class="tooltip_style"><span class="tooltip_left">省内阳性率 </span><span class="tooltip_right">${String(
+                    <p class="tooltip_style"><span class="tooltip_left">省内阳性率 </span><span class="tooltip_right">${data ? String(
     (data.yang / data.total) * 100
-  ).slice(0, 5)}%</span></p>
-                    <p class="tooltip_style"><span class="tooltip_left">病例国内占比</span><span class="tooltip_right">${String((
+  ).slice(0, 5) : 0}%</span></p>
+                    <p class="tooltip_style"><span class="tooltip_left">病例国内占比</span><span class="tooltip_right">${data ? String((
     data.yang / 4087
-  ) * 100).slice(0, 5)}%</span></p>
+  ) * 100).slice(0, 5) : 0}%</span></p>
 
                </div>
             `;
@@ -147,9 +147,6 @@ export default {
     };
   },
   methods: {
-    aba() {
-      console.log(this.radio1);
-    },
     // 初始化中国地图
     initEchartMap() {
       let mapDiv = document.getElementById("china_map");
@@ -216,8 +213,6 @@ export default {
           });
           this.dataList = diseace;
         }
-
-        console.log(diseace);
       });
       this.setEchartOption();
       this.initEchartMap();

@@ -1,23 +1,6 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 
-// import Login from '../components/Login.vue'
-// import Home from '../components/Home.vue'
-// import Welcome from '../components/Welcome.vue'
-
-// import Users from '../components/user/User.vue'
-// import Rights from '../components/power/Rights.vue'
-// import Roles from '../components/power/Roles.vue'
-
-// import Cate from '../components/Chip/Cate.vue'
-// import Params from '../components/Chip/Params.vue'
-
-// import GoodsList from '../components/Chip/List.vue'
-// import Add from '../components/Chip/Add.vue'
-
-// import Order from '../components/order/Static.vue'
-// import Report from '../components/report/Report.vue'
-
 // 路由懒加载
 const Login = () =>
   import(
@@ -26,9 +9,7 @@ const Login = () =>
 const Home = () =>
   import(/* webpackChunkName: "Login_Home_Welcome" */ "../components/Home.vue");
 const Welcome = () =>
-  import(
-    /* webpackChunkName: "Login_Home_Welcome" */ "../components/Welcome.vue"
-  );
+  import(/* webpackChunkName: "Welcome" */ "../components/Welcome.vue");
 
 const Users = () =>
   import(
@@ -43,11 +24,6 @@ const Roles = () =>
     /* webpackChunkName: "Users_Rights_Roles" */ "../components/power/Roles.vue"
   );
 
-const Cate = () =>
-  import(/* webpackChunkName: "Cate_Params" */ "../components/Chip/Cate.vue");
-const Params = () =>
-  import(/* webpackChunkName: "Cate_Params" */ "../components/Chip/Params.vue");
-
 const GoodsList = () =>
   import(/* webpackChunkName: "GoodsList_Add" */ "../components/Chip/List.vue");
 const Add = () =>
@@ -61,9 +37,13 @@ const Report = () =>
   import(
     /* webpackChunkName: "Order_Report" */ "../components/report/Report.vue"
   );
-const ChipReport = () =>
+const StaticReport = () =>
   import(
     /* webpackChunkName: "ChipReport" */ "../components/report/Report2.vue"
+  );
+const ChipReport = () =>
+  import(
+    /* webpackChunkName: "ChipReport" */ "../components/report/Report3.vue"
   );
 const LogReport = () =>
   import(
@@ -84,14 +64,13 @@ const routes = [
       { path: "/users", component: Users },
       { path: "/rights", component: Rights },
       { path: "/roles", component: Roles },
-      { path: "/categories", component: Cate },
-      { path: "/params", component: Params },
       { path: "/statics", component: Order },
       { path: "/statics/add", component: Add },
       { path: "/chip", component: GoodsList },
       { path: "/reports", component: Report },
       { path: "/reports-chip", component: ChipReport },
-      { path: "/reports-log", component: LogReport }
+      { path: "/reports-log", component: LogReport },
+      { path: "/reports-static", component: StaticReport }
     ]
   }
 ];

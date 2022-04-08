@@ -14,12 +14,12 @@
             placeholder="请输入芯片名称"
             v-model="queryInfo.query"
             clearable
-            @clear="getGoodsList"
+            @clear="getChipsList"
           >
             <el-button
               slot="append"
               icon="el-icon-search"
-              @click="getGoodsList"
+              @click="getChipsList"
             ></el-button>
           </el-input>
         </el-col>
@@ -28,7 +28,7 @@
         </el-col>
       </el-row>
       <!-- 表格数据 -->
-      <el-table :data="goodsList" border stripe>
+      <el-table :data="chipList" border stripe>
         <el-table-column type="index"></el-table-column>
         <el-table-column label="芯片名称" prop="chip_name"></el-table-column>
         <el-table-column label="芯片参数" prop="chip_desc"></el-table-column>
@@ -104,7 +104,7 @@
 
     <el-dialog
       title="修改信息"
-      :visible.sync="addressDialogVisible"
+      :visible.sync="FormVisible"
       width="50%"
       @close="handleClose"
     >
@@ -168,10 +168,10 @@ export default {
         pagesize: 10
       },
       // 芯片列表
-      goodsList: [],
+      chipList: [],
       // 芯片总数
       total: 0,
-      addressDialogVisible: false,
+      FormVisible: false,
       chipForm: {
         chipDesc: "",
         chipName: "",
@@ -182,19 +182,19 @@ export default {
     };
   },
   created() {
-    this.getGoodsList();
+    this.getChipsList();
   },
   methods: {
     handleClose() {
-      this.addressDialogVisible = false;
+      this.FormVisible = false;
       this.$refs["chipFormRef"].resetFields();
     },
     async submitForm() {
       const { data: res } = await this.$http.put(
-        "goods/" + this.curItem.chip_id,
+        "chips/" + this.curItem.chip_id,
         {
           ...this.curItem,
-          goods_cat: "1,1,1",
+          total_cat: "1,1,1",
           chip_desc: this.chipForm.chipDesc,
           chip_number: this.chipForm.chipNum,
           chip_name: this.chipForm.chipName,
@@ -203,8 +203,8 @@ export default {
       );
 
       if (res.meta.status === 200) {
-        this.addressDialogVisible = false;
-        this.getGoodsList();
+        this.FormVisible = false;
+        this.getChipsList();
         this.$message.success("修改成功");
       } else {
         this.$message.error("修改失败");
@@ -213,7 +213,7 @@ export default {
       console.log(res);
     },
     showEditDialog(item) {
-      this.addressDialogVisible = true;
+      this.FormVisible = true;
       this.curItem = item;
       this.chipForm.chipName = item.chip_name;
       this.chipForm.chipDesc = item.chip_desc;
@@ -221,24 +221,23 @@ export default {
       this.chipForm.chipColor = Number(item.color_mumber);
     },
     // 根据分页获取对应的芯片列表
-    async getGoodsList() {
-      const { data: res } = await this.$http.get("goods", {
+    async getChipsList() {
+      const { data: res } = await this.$http.get("chips", {
         params: this.queryInfo
       });
       if (res.meta.status !== 200) {
         return this.$message.error("获取芯片列表失败！");
       }
-      this.goodsList = res.data.goods;
-      //   console.log(this.goodsList)
+      this.chipList = res.data.chips;
       this.total = res.data.total;
     },
     handleSizeChange(newSize) {
       this.queryInfo.pagesize = newSize;
-      this.getGoodsList();
+      this.getChipsList();
     },
     handleCurrentChange(newSize) {
       this.queryInfo.pagenum = newSize;
-      this.getGoodsList();
+      this.getChipsList();
     },
     // 通过Id删除芯片
     async removeById(id) {
@@ -254,12 +253,12 @@ export default {
       if (confirmResult !== "confirm") {
         return this.$message.info("已取消删除！");
       }
-      const { data: res } = await this.$http.delete("goods/" + id);
+      const { data: res } = await this.$http.delete("chips/" + id);
       if (res.meta.status !== 200) {
         return this.$message.error("删除芯片失败！");
       }
       this.$message.success("删除芯片成功！");
-      this.getGoodsList();
+      this.getChipsList();
     },
     goAddPage() {
       this.$router.push("/statics/add");
