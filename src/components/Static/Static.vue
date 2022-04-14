@@ -41,9 +41,9 @@
             placeholder="请选择检测芯片"
             @change="getStaticList"
           >
-            <div style="width:100%">
+            <div style="width: 100%">
               <el-option
-                style="width:100%"
+                style="width: 100%"
                 v-for="item in chipsList"
                 :key="item.chip_id"
                 :label="item.chip_name"
@@ -54,9 +54,9 @@
           </el-select>
         </el-col>
         <el-col :span="6">
-          <div style="width:100%">
+          <div style="width: 100%">
             <el-date-picker
-              style="width:100%"
+              style="width: 100%"
               v-model="value2"
               type="daterange"
               align="right"
@@ -101,7 +101,7 @@
         <el-table-column label="检测人名" prop="test_name"> </el-table-column>
         <el-table-column label="芯片信息" prop="static_chip"
           ><template slot-scope="scope">{{
-            chipsList.filter(v => {
+            chipsList.filter((v) => {
               return v.chip_id === scope.row.static_chip;
             })[0].chip_name
           }}</template></el-table-column
@@ -167,16 +167,12 @@
       <div id="echart1" v-if="progressDialogVisible"></div>
       <el-descriptions class="margin-top" title="预估数据" :column="2" border>
         <el-descriptions-item>
-          <template slot="label">
-            阈值
-          </template>
+          <template slot="label"> 阈值 </template>
           {{ this.dty }}
         </el-descriptions-item>
 
         <el-descriptions-item>
-          <template slot="label">
-            预估阴阳性
-          </template>
+          <template slot="label"> 预估阴阳性 </template>
           {{ this.positive ? "阳" : "阴" }}
         </el-descriptions-item>
         <el-descriptions-item
@@ -224,87 +220,80 @@ export default {
             text: "最近一周",
             onClick(picker) {
               const end = moment().endOf("day");
-              const start = moment()
-                .subtract(6, "days")
-                .startOf("day");
+              const start = moment().subtract(6, "days").startOf("day");
 
               picker.$emit("pick", [start, end]);
-            }
+            },
           },
           {
             text: "最近30天",
             onClick(picker) {
               const end = moment().endOf("day");
-              const start = moment()
-                .subtract(29, "days")
-                .startOf("day");
+              const start = moment().subtract(29, "days").startOf("day");
               picker.$emit("pick", [start, end]);
-            }
+            },
           },
           {
             text: "最近90天",
             onClick(picker) {
               const end = moment().endOf("day");
-              const start = moment()
-                .subtract(89, "days")
-                .startOf("day");
+              const start = moment().subtract(89, "days").startOf("day");
               picker.$emit("pick", [start, end]);
-            }
-          }
-        ]
+            },
+          },
+        ],
       },
       options: {
         1: "#FF0000",
         2: "#008000",
         3: "#FFFF00",
         4: "#F5DEB3",
-        5: "#0000FF"
+        5: "#0000FF",
       },
       exportDataStandard: {
         设备号: "static_number",
         样本信息: {
           field: "static_price",
-          callback: value => {
-            console.log(value);
+          callback: (value) => {
             if (!value.static_price) return "";
             return value;
-          }
+          },
         },
         检测人名: "test_name",
         芯片信息: {
           field: "static_chip",
-          callback: value => {
-            return this.chipsList.filter(v => {
+          callback: (value) => {
+            return this.chipsList.filter((v) => {
               return v.chip_id === value;
             })[0].chip_name;
-          }
+          },
         },
         检测时间: {
           field: "create_time",
-          callback: value => {
+          callback: (value) => {
             return this.$moment(value).format("YYYY-MM-DD Hh:Mm:Ss");
-          }
+          },
         },
-        数据文件路径: "static_path"
+        数据文件路径: "static_path",
       },
       exportName: "导出数据",
       multipleSelection: "",
 
       modalStatic: {
         x: [1, 2],
-        y: [5, 5]
+        y: [5, 5],
       },
       show: false,
       // 检测数据列表查询参数
       queryInfo: {
         query: "",
         pagenum: 1,
-        pagesize: 10
+        pagesize: 10,
       },
       queryInfo2: {
         query: "",
         pagenum: 1,
-        pagesize: 10000
+        pagesize: 10000,
       },
       total: 0,
       // 检测数据列表
@@ -321,7 +310,7 @@ export default {
       curChip: {},
       dty: 0,
       positive: false,
-      curItem: {}
+      curItem: {},
     };
   },
   created() {
@@ -337,8 +326,6 @@ export default {
       this.$refs["FormRef"].resetFields();
     },
     createExportData() {
-      // 点击导出按钮之后,开始导出数据之前的执行函数,返回值为需要下载的数据
-      // TODO:构造需要下载的数据返回
       return this.multipleSelection;
     },
     startDownload() {
@@ -363,15 +350,18 @@ export default {
       let myChart = this.$echarts.init(chartDom);
       let option;
       option = {
+        tooltip: {
+          trigger: 'axis'
+        },
         xAxis: {
           type: "category",
           boundaryGap: false,
-          data: this.modalStatic.x
+          data: this.modalStatic.x,
         },
         yAxis: {
-          type: "value"
+          type: "value",
         },
-        series: []
+        series: [],
       };
 
       this.modalStatic.y.map((v, index) => {
@@ -384,38 +374,38 @@ export default {
           markLine: {
             silent: true,
             lineStyle: {
-              color: "#333"
+              color: "#333",
             },
             data: [
               {
-                yAxis: this.dty
-              }
-            ]
+                yAxis: this.dty,
+              },
+            ],
           },
           itemStyle: {
             normal: {
               lineStyle: {
                 width: 2,
-                type: chip.line === "1" ? "dotted" : "solid" // 'dotted'虚线 'solid'实线
+                type: chip.line === "1" ? "dotted" : "solid", // 'dotted'虚线 'solid'实线
                 // color: color
-              }
-            }
-          }
+              },
+            },
+          },
         });
       });
       myChart.setOption(option);
     },
 
     calThreshold(array) {
-      let sum = function(x, y) {
+      let sum = function (x, y) {
         return x + y;
       }; // 求和函数
-      let square = function(x) {
+      let square = function (x) {
         return x * x;
       }; // 数组中每个元素求它的平方
       let data = array; //
       let mean = data.reduce(sum) / data.length;
-      let deviations = data.map(function(x) {
+      let deviations = data.map(function (x) {
         return x - mean;
       });
       let stddev = Math.sqrt(
@@ -431,7 +421,7 @@ export default {
 
     async getChipsList() {
       const { data: res } = await this.$http.get("chips", {
-        params: this.queryInfo2
+        params: this.queryInfo2,
       });
       if (res.meta.status !== 200) {
         return this.$message.error("获取芯片列表失败！");
@@ -442,7 +432,7 @@ export default {
     },
     async getStaticList() {
       const { data: res } = await this.$http.get("statics", {
-        params: this.queryInfo
+        params: this.queryInfo,
       });
       if (res.meta.status !== 200) {
         return this.$message.error("获取检测数据列表失败！");
@@ -462,7 +452,7 @@ export default {
     showEditDialog(val) {
       this.FormVisible = true;
       this.curItem = val;
-      this.positiveReal = this.curItem.positive
+      this.positiveReal = this.curItem.positive;
     },
 
     async showProgressDialog(val) {
@@ -477,16 +467,15 @@ export default {
       this.curChip = res.data.static_chip;
 
       this.curChip = this.chipsList.find(
-        v => v.chip_id === res.data.static_chip
+        (v) => v.chip_id === res.data.static_chip
       );
 
       let ctValue = this.calThreshold(
-        // total
-        data.y[0].slice(2, 16).map(v => Number(v))
+        data.y[0].slice(2, 16).map((v) => Number(v))
       );
 
-      this.ctValues = data.y.map(v => {
-        let bigger = v.filter(k => k > ctValue);
+      this.ctValues = data.y.map((v) => {
+        let bigger = v.filter((k) => k > ctValue);
         console.log((v[v.length - 1] - v[0]) / data.x[-1] < 10.0);
         if (!bigger.length) {
           return "无CT值";
@@ -500,7 +489,7 @@ export default {
       });
 
       this.positive = this.ctValues
-        .map(v => {
+        .map((v) => {
           if (v === "无CT值") {
             return "阴";
           } else if (v < this.curChip.color_mumber) {
@@ -514,10 +503,10 @@ export default {
       this.queryInfo.pagenum = 1;
       this.queryInfo.create_time = [
         moment(time[0]).unix(),
-        moment(time[1]).unix()
+        moment(time[1]).unix(),
       ];
       const { data: res } = await this.$http.get("statics", {
-        params: this.queryInfo
+        params: this.queryInfo,
       });
       if (res.meta.status !== 200) {
         return this.$message.error("获取检测数据列表失败！");
@@ -533,9 +522,9 @@ export default {
         {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
-          type: "warning"
+          type: "warning",
         }
-      ).catch(err => err);
+      ).catch((err) => err);
       if (confirmResult !== "confirm") {
         return this.$message.info("已取消删除！");
       }
@@ -554,7 +543,7 @@ export default {
         "statics/" + this.curItem.static_id,
         {
           ...this.curItem,
-          positive: this.positiveReal
+          positive: this.positiveReal,
         }
       );
 
@@ -566,8 +555,8 @@ export default {
         this.$message.error("修改失败");
       }
       this.$refs["FormRef"].resetFields();
-    }
-  }
+    },
+  },
 };
 </script>
 

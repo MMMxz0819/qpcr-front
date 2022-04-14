@@ -40,36 +40,38 @@ export default {
     return {
       loginForm: {
         username: "admin",
-        password: "123456"
+        password: "123456",
       },
       // 表单验证
       loginFormRules: {
         username: [
           { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 2, max: 10, message: "长度在 2 到 10 个字符", trigger: "blur" }
+          {
+            min: 2,
+            max: 10,
+            message: "长度在 2 到 10 个字符",
+            trigger: "blur",
+          },
         ],
         password: [
           { required: true, message: "请输入用户密码", trigger: "blur" },
-          { min: 6, max: 18, message: "长度在 6 到 18 个字符", trigger: "blur" }
-        ]
-      }
+          {
+            min: 6,
+            max: 18,
+            message: "长度在 6 到 18 个字符",
+            trigger: "blur",
+          },
+        ],
+      },
     };
   },
   methods: {
-    // 表单重置按钮
     resetLoginForm() {
-      // console.log(this)
-      // resetFields：element-ui提供的表单方法
       this.$refs.loginFormRef.resetFields();
     },
     login() {
-      // 表单预验证
-      // valid：bool类型
-      this.$refs.loginFormRef.validate(async valid => {
-        // console.log(valid)
+      this.$refs.loginFormRef.validate(async (valid) => {
         if (!valid) return false;
-        // this.$http.post('login', this.loginForm): 返回值为promise
-        // 返回值为promise，可加await简化操作 相应的也要加async
         const { data: res } = await this.$http.post("login", this.loginForm);
         // console.log(res)
         if (res.meta.status !== 200) return this.$message.error("登录失败");
@@ -78,14 +80,12 @@ export default {
         window.sessionStorage.setItem("user", res.data.username);
         this.$router.push("/home");
       });
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style lang="less" scoped>
-/* // lang="less" 支持less格式
-// scoped vue的指令，只在当前组件生效 */
 .login_container {
   background: url(../assets/img/R-C.jpeg) no-repeat;
   height: 100%;

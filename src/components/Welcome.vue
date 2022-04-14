@@ -120,30 +120,30 @@ export default {
             {
               gte: 1000,
               label: ">= 1000",
-              color: "#1f307b"
+              color: "#A0522D"
             },
             {
               gte: 500,
               lt: 999,
               label: "500 - 999",
-              color: "#3c57ce"
+              color: "#D2691E"
             },
             {
               gte: 100,
               lt: 499,
               label: "100 - 499",
-              color: "#6f83db"
+              color: "#FF8C00"
             },
             {
               gte: 10,
               lt: 99,
               label: "10 - 99",
-              color: "#9face7"
+              color: "#FFA500"
             },
             {
               lt: 10,
               label: "<10",
-              color: "#bcc5ee"
+              color: "#FFDEAD"
             }
           ]
         },

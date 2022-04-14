@@ -12,7 +12,7 @@
       <el-row :gutter="20">
         <el-col :span="6">
           <el-input
-            placeholder="请输入内容"
+            placeholder="请输入用户名"
             v-model="queryInfo.query"
             clearable
             @clear="getUserList"
@@ -298,7 +298,7 @@ export default {
         return this.$message.error("获取用户列表失败！");
       }
       this.userlist = res.data.users;
-      this.totle = res.data.totle;
+      this.totle = res.data.total;
     },
     // 监听 pagesize改变的事件
     handleSizeChange(newSize) {

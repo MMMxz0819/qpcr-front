@@ -21,7 +21,6 @@ import JsonExcel from "vue-json-excel";
 
 import moment from "moment";
 
-// 导入NProgress, 包对应的JS和CSS
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 
@@ -30,26 +29,19 @@ import axios from "axios";
 // 本机地址
 axios.defaults.baseURL = "http://127.0.0.1:8888/api/private/v1/";
 
-// 远程后台地址 仅供参考
-// axios.defaults.baseURL = 'https://www.liulongbin.top:8888/api/private/v1/'
-
-// 在request 拦截器中, 展示进度条 NProgress.start()
-// 请求在到达服务器之前，先会调用use中的这个回调函数来添加请求头信息
 axios.interceptors.request.use(config => {
   NProgress.start();
-  // console.log(config)
-  // 为请求头对象，添加token验证的Authorization字段
   config.headers.Authorization = window.sessionStorage.getItem("token");
-  // 在最后必须 return config
   return config;
 });
-// response 拦截器中,  隐藏进度条NProgress.done()
+
 axios.interceptors.response.use(config => {
   NProgress.done();
   return config;
 });
-// 挂在到Vue实例，后面可通过this调用
+
 Vue.prototype.$http = axios;
+
 Vue.prototype.$echarts = echarts;
 Vue.prototype.$moment = moment;
 Vue.component("downloadExcel", JsonExcel);
@@ -60,7 +52,7 @@ Vue.component("tree-table", TreeTable);
 // 全局注册富文本编辑器
 Vue.use(VueQuillEditor);
 Vue.filter("dataFormat", function(originVal) {
-  return moment.unix(originVal).format('YYYY-MM-DD HH:MM')
+  return moment.unix(originVal).format("YYYY-MM-DD HH:MM");
 });
 
 new Vue({

@@ -49,6 +49,8 @@ import {
   InputNumber
 } from "element-ui";
 
+Vue.prototype.$message = Message;
+Vue.prototype.$confirm = MessageBox.confirm;
 Vue.use(InputNumber);
 Vue.use(Descriptions);
 Vue.use(DescriptionsItem);
@@ -60,8 +62,6 @@ Vue.use(Button);
 Vue.use(Form);
 Vue.use(FormItem);
 Vue.use(Input);
-// 将弹框组件全局挂在到VUe原形实例
-Vue.prototype.$message = Message;
 Vue.use(Container);
 Vue.use(Header);
 Vue.use(Aside);
@@ -81,7 +81,6 @@ Vue.use(Switch);
 Vue.use(Tooltip);
 Vue.use(Pagination);
 Vue.use(Dialog);
-Vue.prototype.$confirm = MessageBox.confirm;
 Vue.use(Tag);
 Vue.use(Tree);
 Vue.use(Select);
