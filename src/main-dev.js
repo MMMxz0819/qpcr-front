@@ -29,13 +29,13 @@ import axios from "axios";
 // 本机地址
 axios.defaults.baseURL = "http://127.0.0.1:8888/api/private/v1/";
 
-axios.interceptors.request.use(config => {
+axios.interceptors.request.use((config) => {
   NProgress.start();
   config.headers.Authorization = window.sessionStorage.getItem("token");
   return config;
 });
 
-axios.interceptors.response.use(config => {
+axios.interceptors.response.use((config) => {
   NProgress.done();
   return config;
 });
@@ -51,11 +51,11 @@ Vue.config.productionTip = false;
 Vue.component("tree-table", TreeTable);
 // 全局注册富文本编辑器
 Vue.use(VueQuillEditor);
-Vue.filter("dataFormat", function(originVal) {
+Vue.filter("dataFormat", function (originVal) {
   return moment.unix(originVal).format("YYYY-MM-DD HH:MM");
 });
 
 new Vue({
   router,
-  render: h => h(App)
+  render: (h) => h(App),
 }).$mount("#app");

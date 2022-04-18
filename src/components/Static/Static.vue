@@ -97,7 +97,7 @@
         >
         <el-table-column type="selection" width="55"> </el-table-column>
         <el-table-column label="设备号" prop="static_number"></el-table-column>
-        <el-table-column label="样本信息" prop="static_price"></el-table-column>
+        <el-table-column label="样本信息" prop="static_des"></el-table-column>
         <el-table-column label="检测人名" prop="test_name"> </el-table-column>
         <el-table-column label="芯片信息" prop="static_chip"
           ><template slot-scope="scope">{{
@@ -253,10 +253,11 @@ export default {
       exportDataStandard: {
         设备号: "static_number",
         样本信息: {
-          field: "static_price",
+          field: "static_des",
           callback: (value) => {
-            if (!value.static_price) return "";
-            return value;
+            console.log(value.static_des);
+            if (!value.static_des) return "无";
+            return value.static_des;
           },
         },
         检测人名: "test_name",
@@ -271,7 +272,7 @@ export default {
         检测时间: {
           field: "create_time",
           callback: (value) => {
-            return this.$moment(value).format("YYYY-MM-DD Hh:Mm:Ss");
+            return moment.unix(value).format("YYYY-MM-DD HH:MM:Ss");
           },
         },
         数据文件路径: "static_path",
@@ -300,7 +301,7 @@ export default {
       staticList: [],
       // 芯片列表
       chipsList: [],
-      // 修改地址对话框
+      // 对话框
       FormVisible: false,
 
       // 检测曲线对话框
@@ -351,7 +352,7 @@ export default {
       let option;
       option = {
         tooltip: {
-          trigger: 'axis'
+          trigger: "axis",
         },
         xAxis: {
           type: "category",

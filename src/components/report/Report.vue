@@ -211,7 +211,7 @@ export default {
       console.log('dataList', this.option.options);
     },
     async getStatic() {
-      await this.$http.get("reports/type/1").then((res) => {
+      await this.$http.get("reports/type?typeid=1").then((res) => {
         const result = res.data.data.result;
         this.total = result;
         let diseace = JSON.parse(JSON.stringify(provice));

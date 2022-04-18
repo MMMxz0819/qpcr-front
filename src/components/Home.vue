@@ -1,5 +1,5 @@
 <template>
-  <el-container>
+  <el-container style="height:100%">
     <!-- 头部 -->
     <el-header>
       <div>
@@ -8,7 +8,7 @@
       <el-button type="info" @click="logout">退出</el-button>
     </el-header>
     <!-- 主体 -->
-    <el-container>
+    <el-container style="height:100%">
       <!-- 侧边栏 -->
       <el-aside :width="isCollapse ? '64px' : '200px'">
         <div class="toggle-button" @click="togleCollapse">|||</div>
@@ -55,7 +55,7 @@
         </el-menu>
       </el-aside>
       <!-- 内容主体 -->
-      <el-main>
+      <el-main style="height:100%">
         <router-view></router-view>
       </el-main>
     </el-container>
