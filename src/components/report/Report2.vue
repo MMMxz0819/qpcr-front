@@ -15,7 +15,7 @@
       element-loading-spinner="el-icon-loading"
     >
       <el-date-picker
-      clearable="false"
+      :clearable='false'
         v-model="value2"
         type="daterange"
         align="right"
@@ -51,8 +51,9 @@
       <div id="equit" style="width: 100%; height: 400px"></div>
 
       <div class="SIR" v-if="showSIR">
-        <img width="50%" src="../../assets/result.png" alt="" />
-        <img width="50%" src="../../assets/model.png" alt="" />
+        <!-- <img width="50%" src="../../assets/result.png" alt="" />
+        <img width="50%" src="../../assets/model.png" alt="" /> -->
+        <div id="model" style="width: 50%; height: 400px"></div>
       </div>
     </el-card>
   </div>
@@ -243,6 +244,10 @@ export default {
         this.showSIR = false
       } else {
         this.showSIR = true
+      }
+
+      if (!res.data.res.all.length) {
+        this.showSIR = false
       }
 
       this.handleDay(res.data.res);

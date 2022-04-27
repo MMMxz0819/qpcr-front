@@ -1,5 +1,5 @@
 <template>
-  <el-container style="height:100%">
+  <el-container style="min-height: 100vh">
     <!-- 头部 -->
     <el-header>
       <div>
@@ -8,7 +8,7 @@
       <el-button type="info" @click="logout">退出</el-button>
     </el-header>
     <!-- 主体 -->
-    <el-container style="height:100%">
+    <el-container style="height: 100%">
       <!-- 侧边栏 -->
       <el-aside :width="isCollapse ? '64px' : '200px'">
         <div class="toggle-button" @click="togleCollapse">|||</div>
@@ -55,7 +55,7 @@
         </el-menu>
       </el-aside>
       <!-- 内容主体 -->
-      <el-main style="height:100%">
+      <el-main style="height: 100%,min-height: 100vh">
         <router-view></router-view>
       </el-main>
     </el-container>
@@ -69,16 +69,16 @@ export default {
       // 左侧菜单数据
       menuList: [],
       iconObj: {
-        "125": "iconfont icon-user",
-        "103": "iconfont icon-tijikongjian",
-        "101": "iconfont icon-shangpin",
-        "102": "iconfont icon-danju",
-        "145": "iconfont icon-baobiao"
+        125: "iconfont icon-user",
+        103: "iconfont icon-tijikongjian",
+        101: "iconfont icon-shangpin",
+        102: "iconfont icon-danju",
+        145: "iconfont icon-baobiao",
       },
       // 默认不折叠
       isCollapse: false,
       // 被激活导航地址
-      activePath: ""
+      activePath: "",
     };
   },
   created() {
@@ -105,14 +105,15 @@ export default {
     // 保存连接的激活地址
     saveNavState(activePath) {
       window.sessionStorage.setItem("activePath", activePath);
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style lang="less" scoped>
 .el-container {
   height: 100%;
+  min-height: 100vh;
 }
 .el-header {
   background-color: #373f41;

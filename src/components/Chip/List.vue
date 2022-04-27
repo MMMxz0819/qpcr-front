@@ -34,34 +34,14 @@
         <el-table-column label="芯片参数" prop="chip_desc"></el-table-column>
         <el-table-column label="芯片数量" prop="chip_number"></el-table-column>
         <el-table-column label="CT值阈值" prop="color_mumber"></el-table-column>
-        <!-- <el-table-column label="芯片曲线颜色">
-          <template slot-scope="scope">
-            <div>
-              <span>
-                {{ scope.row.color_mumber.includes("1") ? "红" : "" }}</span
-              >
-              <span>
-                {{ scope.row.color_mumber.includes("2") ? "绿" : "" }}</span
-              >
-              <span>
-                {{ scope.row.color_mumber.includes("3") ? "黄" : "" }}</span
-              >
-              <span>
-                {{ scope.row.color_mumber.includes("4") ? "橙" : "" }}</span
-              >
-              <span>
-                {{ scope.row.color_mumber.includes("5") ? "蓝" : "" }}</span
-              >
-            </div>
-          </template>
-        </el-table-column> -->
+
         <el-table-column label="芯片曲线虚实">
           <template slot-scope="scope">
             <div>
               {{
                 {
                   1: "虚",
-                  "0": "实"
+                  "0": "实",
                 }[scope.row.line]
               }}
             </div>
@@ -124,6 +104,13 @@
             :min="1"
           ></el-input-number>
         </el-form-item>
+        <el-form-item label="感染系数" prop="total_cat">
+          <el-input v-model="chipForm.total_cat[0]"></el-input> </el-form-item
+        ><el-form-item label="治愈系数" prop="total_cat">
+          <el-input v-model="chipForm.total_cat[1]"></el-input> </el-form-item
+        ><el-form-item label="易感人数" prop="total_cat">
+          <el-input v-model="chipForm.total_cat[2]"></el-input>
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="handleClose">取 消</el-button>
@@ -139,33 +126,10 @@
 export default {
   data() {
     return {
-      // 曲线颜色选择
-      options: [
-        {
-          value: 1,
-          label: "红"
-        },
-        {
-          value: 2,
-          label: "绿"
-        },
-        {
-          value: 3,
-          label: "黄"
-        },
-        {
-          value: 4,
-          label: "橙"
-        },
-        {
-          value: 5,
-          label: "蓝"
-        }
-      ],
       queryInfo: {
         query: "",
         pagenum: 1,
-        pagesize: 10
+        pagesize: 10,
       },
       // 芯片列表
       chipList: [],
@@ -176,9 +140,10 @@ export default {
         chipDesc: "",
         chipName: "",
         chipNum: 0,
-        chipColor: ""
+        chipColor: "",
+        total_cat: [1, 1, 1],
       },
-      curItem: ""
+      curItem: "",
     };
   },
   created() {
@@ -194,11 +159,11 @@ export default {
         "chips/" + this.curItem.chip_id,
         {
           ...this.curItem,
-          total_cat: "1,1,1",
+          total_cat: this.chipForm.total_cat.join(","),
           chip_desc: this.chipForm.chipDesc,
           chip_number: this.chipForm.chipNum,
           chip_name: this.chipForm.chipName,
-          color_mumber: this.chipForm.chipColor
+          color_mumber: this.chipForm.chipColor,
         }
       );
 
@@ -219,11 +184,16 @@ export default {
       this.chipForm.chipDesc = item.chip_desc;
       this.chipForm.chipNum = item.chip_number;
       this.chipForm.chipColor = Number(item.color_mumber);
+      this.chipForm.total_cat = [
+        item.cat_one_id,
+        item.cat_two_id,
+        item.cat_three_id,
+      ];
     },
     // 根据分页获取对应的芯片列表
     async getChipsList() {
       const { data: res } = await this.$http.get("chips", {
-        params: this.queryInfo
+        params: this.queryInfo,
       });
       if (res.meta.status !== 200) {
         return this.$message.error("获取芯片列表失败！");
@@ -247,9 +217,9 @@ export default {
         {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
-          type: "warning"
+          type: "warning",
         }
-      ).catch(err => err);
+      ).catch((err) => err);
       if (confirmResult !== "confirm") {
         return this.$message.info("已取消删除！");
       }
@@ -262,8 +232,8 @@ export default {
     },
     goAddPage() {
       this.$router.push("/statics/add");
-    }
-  }
+    },
+  },
 };
 </script>
 

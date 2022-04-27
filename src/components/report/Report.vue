@@ -261,11 +261,11 @@ export default {
 }
 #china_map_box {
   background-color: #fff;
-  height: 90%;
+  height: 100%;
   position: relative;
 }
 #china_map_box #china_map {
-  height: 100%;
+  height: 90%;
 }
 #china_map_box .china_map_logo {
   position: absolute;

@@ -49,7 +49,7 @@ export default {
   methods: {
     // 根据分页获取对应的芯片列表
     async getLogsList() {
-      this.$http.get("reports/type/2").then(res => {
+      this.$http.get("reports/type?typeid=2").then(res => {
         const data = res.data.data;
         if (res.data.meta.status !== 200) {
           return this.$message.error("获取日志列表失败！");

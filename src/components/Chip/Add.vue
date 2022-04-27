@@ -24,11 +24,8 @@
         align-center
       >
         <el-step title="基本信息"></el-step>
-        <!-- <el-step title="芯片参数"></el-step> -->
-        <!-- <el-step title="芯片属性"></el-step> -->
-        <el-step title="芯片内容"></el-step>
 
-        <!-- <el-step title="完成"></el-step> -->
+        <el-step title="芯片内容"></el-step>
       </el-steps>
 
       <!-- Tab栏 -->
@@ -52,20 +49,28 @@
             </el-form-item>
           </el-tab-pane>
           <el-tab-pane label="芯片内容" name="2">
-            <el-form-item label="芯片参数" prop="chip_desc">
-              <el-input v-model="addForm.chip_desc"></el-input>
-            </el-form-item>
             <el-form-item label="CT值阈值" prop="color_mumber">
-              <el-input-number
+              <el-input type="number"
                 v-model="addForm.color_mumber"
                 :min="1"
-              ></el-input-number>
+              ></el-input>
             </el-form-item>
             <el-form-item label="芯片曲线虚实" prop="line">
               <el-radio v-model="addForm.line" label="1">虚</el-radio>
               <el-radio v-model="addForm.line" label="0">实</el-radio>
             </el-form-item>
-
+            <el-form-item label="芯片参数" prop="chip_desc">
+              <el-input v-model="addForm.chip_desc"></el-input>
+            </el-form-item>
+            <el-form-item label="感染系数" prop="chip_desc">
+              <el-input v-model="addForm.total_cat[0]"></el-input>
+            </el-form-item>
+            <el-form-item label="治愈系数" prop="chip_desc">
+              <el-input v-model="addForm.total_cat[1]"></el-input>
+            </el-form-item>
+            <el-form-item label="易感染人数" prop="chip_desc">
+              <el-input v-model="addForm.total_cat[2]"></el-input>
+            </el-form-item>
             <el-button type="primary" class="btnAdd" @click="addChip"
               >添加芯片</el-button
             >
@@ -96,7 +101,7 @@ export default {
         chip_desc: "",
         chip_number: 0,
         // 芯片所属分类数组
-        total_cat: 1,
+        total_cat: [1, 1, 1],
         // 图片的数组
         pics: [],
         // 芯片详情描述
@@ -195,16 +200,9 @@ export default {
     addChip() {
       this.$refs.addFormRef.validate(async (valid) => {
         if (!valid) return this.$message.error("请填写必要的表单项！");
-        // 发送请求前：需对提交的表单进行处理total_cat attrs
-        // this.addForm.total_cat = this.addForm.total_cat.join(',')
-        // 以上写法不对：级联选择器绑定的对象total_cat要求是数组对象
-        // 解决办法: 包：lodash 方法（深拷贝）：cloneDeep(boj)
 
-        // 将this.addForm进行深拷贝
         const form = _.cloneDeep(this.addForm);
-        form.total_cat = [form.total_cat, form.total_cat, form.total_cat].join(
-          ","
-        );
+        form.total_cat = form.total_cat.join(",");
 
         // 处理动态参数
         this.manyTableData.forEach((item) => {

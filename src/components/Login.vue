@@ -88,7 +88,8 @@ export default {
 <style lang="less" scoped>
 .login_container {
   background: url(../assets/img/R-C.jpeg) no-repeat;
-  height: 100%;
+  // background-color: red;
+  height: 100vh;
   width: 100%;
   background-size: cover;
 }
