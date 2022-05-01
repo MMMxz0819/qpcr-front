@@ -15,7 +15,7 @@
       element-loading-spinner="el-icon-loading"
     >
       <el-date-picker
-      :clearable='false'
+        :clearable="false"
         v-model="value2"
         type="daterange"
         align="right"
@@ -49,11 +49,14 @@
       <!-- 2.为Echarts准备一个Dom -->
       <div id="main" style="width: 100%; height: 400px"></div>
       <div id="equit" style="width: 100%; height: 400px"></div>
+ <!-- :style="{ opacity: showSIR ? 1 : 0 }" -->
+      <div
+        class="SIR"
 
-      <div class="SIR" v-if="showSIR">
-        <!-- <img width="50%" src="../../assets/result.png" alt="" />
-        <img width="50%" src="../../assets/model.png" alt="" /> -->
+        style="margintop: 60px; padding: 0 20px"
+      >
         <div id="model" style="width: 50%; height: 400px"></div>
+        <div id="compare" style="width: 50%; height: 400px"></div>
       </div>
     </el-card>
   </div>
@@ -114,6 +117,7 @@ export default {
           moment().endOf("day").unix(),
         ],
         chart: true,
+
       },
       queryInfo2: {
         query: "",
@@ -185,11 +189,106 @@ export default {
 
         series: [],
       },
+      modeloption: {
+        title: {
+          text: "SIR Model",
+        },
+        tooltip: {
+          trigger: "axis",
+        },
+        legend: {
+          data: ["Infectious", "Susceptibles", "Recovereds", "Death"],
+        },
+        grid: {
+          left: "3%",
+          right: "4%",
+          bottom: "3%",
+          containLabel: true,
+        },
+        toolbox: {
+          feature: {
+            saveAsImage: {},
+          },
+        },
+        xAxis: {
+          type: "category",
+          boundaryGap: false,
+          data: Array.from({ length: 50 }, (_, i) => 1 + i),
+        },
+        yAxis: {
+          type: "value",
+        },
+        series: [
+          {
+            name: "Infectious",
+            type: "line",
+            data: [],
+          },
+          {
+            name: "Susceptibles",
+            type: "line",
+            data: [],
+          },
+          {
+            name: "Recovereds",
+            type: "line",
+            data: [],
+          },
+          {
+            name: "Death",
+            type: "line",
+            data: [],
+          },
+        ],
+      },
+      compareOption: {
+        title: {
+          text: "Real and Trend",
+        },
+        tooltip: {
+          trigger: "axis",
+        },
+        legend: {
+          data: ["Real", "forecast"],
+        },
+        grid: {
+          left: "3%",
+          right: "4%",
+          bottom: "3%",
+          containLabel: true,
+        },
+        toolbox: {
+          feature: {
+            saveAsImage: {},
+          },
+        },
+        xAxis: {
+          type: "category",
+          boundaryGap: false,
+        },
+        yAxis: {
+          type: "value",
+        },
+        series: [
+          {
+            name: "Real",
+            type: "scatter",
+            symbolSize: 10,
+            data: [],
+          },
+          {
+            name: "forecast",
+            type: "line",
+            data: [],
+          },
+        ],
+      },
     };
   },
   created() {},
   async mounted() {
-    this.showEchart();
+    // this.showEchart();
+    this.showEchartChip(3)
     this.getChipsList();
   },
   methods: {
@@ -207,12 +306,18 @@ export default {
       this.loading = true;
       var myChart = echarts.init(document.getElementById("main"));
       var myChartEquit = echarts.init(document.getElementById("equit"));
-      // if()
+      // if (document.getElementById("model")) {
+      //   var myChartModel = echarts.init(document.getElementById("model"));
+      // }
+      var myChartModel = echarts.init(document.getElementById("model"));
+      var myChartCompare = echarts.init(document.getElementById("compare"));
+
       const { data: res } = await this.$http.get("statics", {
         params: time
           ? {
             ...this.queryInfo,
             create_time: [moment(time[0]).unix(), moment(time[1]).unix()],
+
           }
           : this.queryInfo,
       });
@@ -220,14 +325,21 @@ export default {
       if (res.meta.status !== 200) return this.$message("获取折线图数据失败!");
       this.handleDay(res.data);
       this.handleStatic(res.data);
+      this.handleModel(res.data.chart);
       myChart.setOption(this.option);
       myChartEquit.setOption(this.barOption);
+      myChartModel.setOption(this.modeloption);
+      myChartCompare.setOption(this.compareOption);
+
       this.loading = false;
     },
     async showEchartChip(chip) {
       this.loading = true;
       var myChart = echarts.init(document.getElementById("main"));
       var myChartEquit = echarts.init(document.getElementById("equit"));
+      var myChartModel = echarts.init(document.getElementById("model"));
+      var myChartCompare = echarts.init(document.getElementById("compare"));
+
       const { data: res } = await this.$http.get("reports/type", {
         params: {
           typeid: 4,
@@ -240,23 +352,44 @@ export default {
       });
 
       if (res.meta.status !== 200) return this.$message("获取折线图数据失败!");
-      if (res.data.msg === '无法生成趋势图') {
-        this.showSIR = false
+      if (res.data.msg === "无法生成趋势图") {
+        this.showSIR = false;
       } else {
-        this.showSIR = true
+        this.showSIR = true;
       }
 
       if (!res.data.res.all.length) {
-        this.showSIR = false
+        this.showSIR = false;
       }
 
       this.handleDay(res.data.res);
       this.handleStatic(res.data.res);
+      this.handleModel(res.data.chart);
       myChart.setOption(this.option);
       myChartEquit.setOption(this.barOption);
+      myChartModel.setOption(this.modeloption);
+      myChartCompare.setOption(this.compareOption);
+      // if (myChartModel) {
+      //   this.$nextTick(() => myChartModel.setOption(this.modeloption));
+      // }
       this.loading = false;
     },
+    handleModel(data) {
+      if (data) {
+        this.modeloption.series.find((v) => v["name"] === "Infectious").data =
+          data["Infectious"];
+        this.modeloption.series.find((v) => v["name"] === "Susceptibles").data =
+          data["Susceptibles"];
+        this.modeloption.series.filter(
+          (v) => v["name"] === "Recovereds"
+        )[0].data = data["Recovereds"];
+        this.modeloption.series.find((v) => v["name"] === "Death").data =
+          data["Death"];
 
+        this.compareOption.series.find((v) => v["name"] === "forecast").data =
+          data["Infectious"];
+      }
+    },
     handleStatic(data) {
       let all = data.all;
       let equit = {};
@@ -323,6 +456,16 @@ export default {
       });
 
       this.option.xAxis.data = source[0];
+      this.compareOption.xAxis.data = [
+        ...source[0],
+        ...Array(50 - source[0].length).fill(""),
+      ];
+      this.compareOption.series.find((v) => v["name"] === "Real").data =
+        positiveSta.map((v) => v["yang"]);
+
+      if (positiveSta[0] && positiveSta[0]["yang"] < 50) {
+        this.compareOption.yAxis.max = 1000;
+      }
 
       this.option.series = [];
       this.option.series.push({
@@ -373,18 +516,30 @@ export default {
     },
     handlePick(time) {
       if (this.curChip || this.curChip === 0) {
-        this.showEchartChip(this.curChip);
+        this.$nextTick(() => {
+          this.showEchartChip(this.curChip);
+        });
+        // this.showEchartChip(this.curChip);
       } else {
-        this.showEchart(time);
+        this.$nextTick(() => {
+          this.showEchart(time);
+        });
+        // this.showEchart(time);
       }
     },
     handlechipPick(chip) {
       if (chip || chip === 0) {
         console.log(chip);
-        this.showEchartChip(chip);
+        this.$nextTick(() => {
+          this.showEchartChip(chip);
+        });
+        // this.showEchartChip(chip);
       } else {
-        this.showSIR = false
-        this.showEchart(this.value2);
+        this.showSIR = false;
+        // this.showEchart(this.value2);
+        this.$nextTick(() => {
+          this.showEchart(this.value2);
+        });
       }
     },
   },
@@ -394,5 +549,6 @@ export default {
 <style lang="less" scoped>
 .SIR {
   display: flex;
+  // width: 100%;
 }
 </style>

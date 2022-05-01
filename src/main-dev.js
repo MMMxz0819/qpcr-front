@@ -52,7 +52,7 @@ Vue.component("tree-table", TreeTable);
 // 全局注册富文本编辑器
 Vue.use(VueQuillEditor);
 Vue.filter("dataFormat", function (originVal) {
-  return moment.unix(originVal).format("YYYY-MM-DD HH:MM");
+  return moment.unix(originVal).format("YYYY-MM-DD HH:mm");
 });
 
 new Vue({

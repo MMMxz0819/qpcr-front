@@ -14,6 +14,7 @@
             clearable
             placeholder="请输入检测人名"
             v-model="queryInfo.test_name"
+
           >
             <el-button
               slot="append"
