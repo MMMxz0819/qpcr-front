@@ -8,12 +8,6 @@ import "./assets/css/global.css";
 import "./assets/fonts/iconfont.css";
 // 导入表格树
 import TreeTable from "vue-table-with-tree-grid";
-// 导入富文本编辑器
-import VueQuillEditor from "vue-quill-editor";
-// 导入富文本编辑器样式
-import "quill/dist/quill.core.css";
-import "quill/dist/quill.snow.css";
-import "quill/dist/quill.bubble.css";
 
 import echarts from "echarts";
 
@@ -49,8 +43,6 @@ Vue.component("downloadExcel", JsonExcel);
 Vue.config.productionTip = false;
 // 组件全局注册 表格树
 Vue.component("tree-table", TreeTable);
-// 全局注册富文本编辑器
-Vue.use(VueQuillEditor);
 Vue.filter("dataFormat", function (originVal) {
   return moment.unix(originVal).format("YYYY-MM-DD HH:mm");
 });

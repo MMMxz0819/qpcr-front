@@ -50,7 +50,8 @@
           </el-tab-pane>
           <el-tab-pane label="芯片内容" name="2">
             <el-form-item label="CT值阈值" prop="color_mumber">
-              <el-input type="number"
+              <el-input
+                type="number"
                 v-model="addForm.color_mumber"
                 :min="1"
               ></el-input>
@@ -62,14 +63,17 @@
             <el-form-item label="芯片参数" prop="chip_desc">
               <el-input v-model="addForm.chip_desc"></el-input>
             </el-form-item>
-            <el-form-item label="感染系数" prop="chip_desc">
+            <el-form-item label="感染系数" prop="total_cat">
               <el-input v-model="addForm.total_cat[0]"></el-input>
             </el-form-item>
-            <el-form-item label="治愈系数" prop="chip_desc">
+            <el-form-item label="治愈系数" prop="total_cat">
               <el-input v-model="addForm.total_cat[1]"></el-input>
             </el-form-item>
-            <el-form-item label="易感染人数" prop="chip_desc">
+            <el-form-item label="易感染人数" prop="total_cat">
               <el-input v-model="addForm.total_cat[2]"></el-input>
+            </el-form-item>
+            <el-form-item label="死亡系数" prop="cat_four_id">
+              <el-input v-model="addForm.cat_four_id"></el-input>
             </el-form-item>
             <el-button type="primary" class="btnAdd" @click="addChip"
               >添加芯片</el-button
@@ -102,6 +106,7 @@ export default {
         chip_number: 0,
         // 芯片所属分类数组
         total_cat: [1, 1, 1],
+        cat_four_id: 0,
         // 图片的数组
         pics: [],
         // 芯片详情描述
@@ -175,27 +180,6 @@ export default {
     // },
     // Tab标签被选中时触发
 
-    // 处理图片预览
-    handlePreview(file) {
-      this.picPreviewPath = file.response.data.url;
-      this.previewDialogVisible = true;
-    },
-    // 处理移除图片的操作
-    handleRemove(file) {
-      // 1.获取将要删除图片的临时路径
-      const filePath = file.response.data.tmp_path;
-      // 2.从pics数组中，找到图片对应的索引值
-      const i = this.addForm.pics.findIndex((x) => x.pic === filePath);
-      // 3.调用splice方法，移除图片信息
-      this.addForm.splice(i, 1);
-    },
-    // 监听图片上传成功事件
-    handleSuccess(response) {
-      // 1.拼接得到一个图片信息对象 临时路径
-      const picInfo = { pic: response.data.tmp_path };
-      // 2.将图片信息对象，push到pics数组中
-      this.addForm.pics.push(picInfo);
-    },
     // 添加芯片
     addChip() {
       this.$refs.addFormRef.validate(async (valid) => {
@@ -221,12 +205,14 @@ export default {
           this.addForm.attrs.push(newInfo);
         });
         form.attrs = this.addForm.attrs;
+        form.cat_four_id = this.addForm.cat_four_id;
         // 发起请求添加芯片
         // 芯片名称必须是唯一的
         const { data: res } = await this.$http.post("chips", form);
         if (res.meta.status !== 201) {
           return this.$message.error("添加芯片失败！");
         }
+        console.log(form);
         this.$message.success("添加芯片成功!");
         this.$router.push("/chip");
       });

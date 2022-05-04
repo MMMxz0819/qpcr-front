@@ -119,7 +119,6 @@ export default {
   // 此时,页面上的元素,已经被渲染完毕了
   async mounted() {
     this.getChipList();
-    // 3.基于准备好的dom，初始化echarts实例
     this.showEchart();
   },
   methods: {
@@ -138,12 +137,6 @@ export default {
       });
       this.handleDay(res);
       if (res.meta.status !== 200) return this.$message("获取折线图数据失败!");
-      // {
-      //   type: "line",
-      //   smooth: true,
-      //   seriesLayoutBy: "row",
-      //   emphasis: { focus: "series" }
-      // },
 
       myChart.on("updateAxisPointer", function (event) {
         const xAxisInfo = event.axesInfo[0];

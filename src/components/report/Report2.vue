@@ -49,10 +49,10 @@
       <!-- 2.为Echarts准备一个Dom -->
       <div id="main" style="width: 100%; height: 400px"></div>
       <div id="equit" style="width: 100%; height: 400px"></div>
- <!-- :style="{ opacity: showSIR ? 1 : 0 }" -->
+
       <div
         class="SIR"
-
+        :style="{ opacity: showSIR ? 1 : 0 }"
         style="margintop: 60px; padding: 0 20px"
       >
         <div id="model" style="width: 50%; height: 400px"></div>
@@ -117,7 +117,6 @@ export default {
           moment().endOf("day").unix(),
         ],
         chart: true,
-
       },
       queryInfo2: {
         query: "",
@@ -287,8 +286,7 @@ export default {
   },
   created() {},
   async mounted() {
-    // this.showEchart();
-    this.showEchartChip(3)
+    this.showEchart();
     this.getChipsList();
   },
   methods: {
@@ -317,7 +315,6 @@ export default {
           ? {
             ...this.queryInfo,
             create_time: [moment(time[0]).unix(), moment(time[1]).unix()],
-
           }
           : this.queryInfo,
       });

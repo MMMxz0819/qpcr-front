@@ -111,6 +111,9 @@
         ><el-form-item label="易感人数" prop="total_cat">
           <el-input v-model="chipForm.total_cat[2]"></el-input>
         </el-form-item>
+        <el-form-item label="死亡系数" prop="cat_four_id">
+          <el-input v-model="chipForm.cat_four_id"></el-input>
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="handleClose">取 消</el-button>
@@ -142,6 +145,7 @@ export default {
         chipNum: 0,
         chipColor: "",
         total_cat: [1, 1, 1],
+        cat_four_id: 0,
       },
       curItem: "",
     };
@@ -164,6 +168,7 @@ export default {
           chip_number: this.chipForm.chipNum,
           chip_name: this.chipForm.chipName,
           color_mumber: this.chipForm.chipColor,
+          cat_four_id: this.chipForm.cat_four_id,
         }
       );
 
@@ -184,6 +189,7 @@ export default {
       this.chipForm.chipDesc = item.chip_desc;
       this.chipForm.chipNum = item.chip_number;
       this.chipForm.chipColor = Number(item.color_mumber);
+      this.chipForm.cat_four_id = Number(item.cat_four_id);
       this.chipForm.total_cat = [
         item.cat_one_id,
         item.cat_two_id,
